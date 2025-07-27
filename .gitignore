@@ -36,3 +36,6 @@ Thumbs.db
 
 # Plugin specific
 data.json
+
+# Publish repository (separate git repo)
+publish-repo/
