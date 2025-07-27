@@ -16,7 +16,7 @@
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Title Generation** - Leverages GPT-3.5/GPT-4 to create meaningful, contextual titles
+- 🤖 **AI-Powered Title Generation** - Leverages GPT latest models to create meaningful, contextual titles
 - 🔄 **Automatic Mode** - Suggests titles automatically as you write your notes
 - 🌍 **Multi-language Support** - Automatic language detection or manual language selection
 - ⚡ **Quick Commands** - Hotkeys for instant title generation
@@ -61,7 +61,7 @@ Copy `main.js`, `manifest.json`, and `styles.css` to your vault's `.obsidian/plu
 | Setting | Description | Default |
 |---------|-------------|---------|
 | **OpenAI API Key** | Your API key for OpenAI access | - |
-| **AI Model** | AI model for generation | gpt-3.5-turbo |
+| **AI Model** | AI model for generation | gpt-4o-mini |
 | **Creativity Level** | Controls randomness (0.0-1.0) | 0.3 |
 | **Auto-generation** | Automatically suggest titles | Enabled |
 | **Language** | Target language for titles | Auto-detect |

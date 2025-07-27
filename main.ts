@@ -7,7 +7,7 @@ export default class AutoTitlePlugin extends Plugin {
   settings: AutoTitleSettings;
   private typingTimer: NodeJS.Timeout | null = null;
   private isGenerating = false;
-  private generatedForCurrentFile: Set<string> = new Set();
+  private generatedCountForFile: Map<string, number> = new Map();
   private statusBarItem: HTMLElement | null = null;
   private indicatorTimer: NodeJS.Timeout | null = null;
 
@@ -47,6 +47,21 @@ export default class AutoTitlePlugin extends Plugin {
       editorCallback: (editor: Editor, view: MarkdownView) => {
         this.generateTitleForEditor(editor, view);
       }
+    });
+
+    // Добавляем команду для прямой генерации без подтверждения
+    this.addCommand({
+      id: 'generate-title-direct',
+      name: 'Generate title without confirmation',
+      editorCallback: (editor: Editor, view: MarkdownView) => {
+        this.generateTitleDirect(editor, view);
+      },
+      hotkeys: [
+        {
+          modifiers: ['Ctrl', 'Shift', 'Alt'],
+          key: 'h'
+        }
+      ]
     });
 
     // Добавляем вкладку настроек
@@ -137,10 +152,13 @@ export default class AutoTitlePlugin extends Plugin {
       return;
     }
     
-    // Не запускать автогенерацию, если уже был сгенерирован заголовок для этой заметки
+    // Не запускать автогенерацию, если достигнут лимит генераций для этой заметки
     const file = view?.file;
-    if (file && this.generatedForCurrentFile.has(file.path)) {
-      return;
+    if (file) {
+      const currentCount = this.generatedCountForFile.get(file.path) || 0;
+      if (currentCount >= this.settings.generationCount) {
+        return;
+      }
     }
     
     // Сбрасываем предыдущий таймер и индикатор
@@ -202,10 +220,13 @@ export default class AutoTitlePlugin extends Plugin {
       return;
     }
     
-    // Не запускать автогенерацию, если уже был сгенерирован заголовок для этой заметки
+    // Не запускать автогенерацию, если достигнут лимит генераций для этой заметки
     const file = view?.file;
-    if (file && this.generatedForCurrentFile.has(file.path)) {
-      return;
+    if (file) {
+      const currentCount = this.generatedCountForFile.get(file.path) || 0;
+      if (currentCount >= this.settings.generationCount) {
+        return;
+      }
     }
     
     try {
@@ -223,8 +244,11 @@ export default class AutoTitlePlugin extends Plugin {
       if (this.settings.replaceMode) {
         this.replaceTitle(editor, suggestedTitle);
         showNotice(`Заголовок обновлен: "${suggestedTitle}"`);
-        // После генерации — больше не автогенерировать для этой заметки
-        if (file) this.generatedForCurrentFile.add(file.path);
+        // Увеличиваем счетчик генераций для этой заметки
+        if (file) {
+          const currentCount = this.generatedCountForFile.get(file.path) || 0;
+          this.generatedCountForFile.set(file.path, currentCount + 1);
+        }
       } else {
         this.showTitleSuggestionModal(editor, view, suggestedTitle);
       }
@@ -361,14 +385,15 @@ export default class AutoTitlePlugin extends Plugin {
       );
 
       // Создаем модальное окно для подтверждения
-      new TitleSuggestionModal(this.app, suggestedTitle, async (accepted: boolean) => {
+      new TitleSuggestionModal(this.app, suggestedTitle, async (accepted: boolean, editedTitle?: string) => {
         if (accepted) {
+          const finalTitle = editedTitle || suggestedTitle;
           // Обновляем содержимое файла
-          const updatedContent = this.insertTitleIntoContent(content, suggestedTitle);
+          const updatedContent = this.insertTitleIntoContent(content, finalTitle);
           await this.app.vault.modify(file, updatedContent);
-          showNotice(`Заголовок добавлен в файл: "${suggestedTitle}"`);
+          showNotice(`Заголовок добавлен в файл: "${finalTitle}"`);
         }
-      }).open();
+      }, null, null, this).open();
     } catch (error) {
       console.error('Ошибка генерации заголовка:', error);
       showNotice(`Ошибка: ${error.message}`);
@@ -378,19 +403,23 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   private showTitleSuggestionModal(editor: Editor, view: MarkdownView, suggestedTitle: string) {
-    new TitleSuggestionModal(this.app, suggestedTitle, (accepted: boolean) => {
+    new TitleSuggestionModal(this.app, suggestedTitle, (accepted: boolean, editedTitle?: string) => {
       if (accepted) {
-        this.replaceTitle(editor, suggestedTitle);
-        showNotice(`Заголовок обновлен: "${suggestedTitle}"`);
-        // После генерации — больше не автогенерировать для этой заметки
+        const finalTitle = editedTitle || suggestedTitle;
+        this.replaceTitle(editor, finalTitle);
+        showNotice(`Заголовок обновлен: "${finalTitle}"`);
+        // Увеличиваем счетчик генераций для этой заметки
         const file = view?.file;
-        if (file) this.generatedForCurrentFile.add(file.path);
+        if (file) {
+          const currentCount = this.generatedCountForFile.get(file.path) || 0;
+          this.generatedCountForFile.set(file.path, currentCount + 1);
+        }
         // Переименовываем файл, если это возможно
         if (view.file) {
-          this.renameFile(view.file, suggestedTitle);
+          this.renameFile(view.file, finalTitle);
         }
       }
-    }).open();
+    }, editor, view, this).open();
   }
 
   private replaceTitle(editor: Editor, newTitle: string) {
@@ -450,16 +479,75 @@ export default class AutoTitlePlugin extends Plugin {
       // Не показываем ошибку пользователю, так как это не критично
     }
   }
+
+  private async generateTitleDirect(editor: Editor, view: MarkdownView) {
+    if (this.isGenerating) {
+      showNotice('Генерация заголовка уже выполняется...');
+      return;
+    }
+
+    const content = editor.getValue();
+    if (!content || content.trim().length < 10) {
+      showNotice('Недостаточно содержимого для генерации заголовка');
+      return;
+    }
+
+    if (!this.settings.apiKey) {
+      showNotice('Настройте API ключ OpenAI в настройках плагина');
+      return;
+    }
+
+    try {
+      this.isGenerating = true;
+      showNotice('Генерирую заголовок...', 2000);
+
+      const suggestedTitle = await generateTitle(
+        content,
+        this.settings.apiKey,
+        this.settings.model,
+        this.settings.temperature,
+        this.settings.language
+      );
+
+      // Применяем заголовок напрямую без подтверждения
+      this.replaceTitle(editor, suggestedTitle);
+      showNotice(`Заголовок обновлен: "${suggestedTitle}"`);
+      
+      // Увеличиваем счетчик генераций для этой заметки
+      const file = view?.file;
+      if (file) {
+        const currentCount = this.generatedCountForFile.get(file.path) || 0;
+        this.generatedCountForFile.set(file.path, currentCount + 1);
+      }
+      
+      // Переименовываем файл, если это возможно
+      if (view.file) {
+        this.renameFile(view.file, suggestedTitle);
+      }
+    } catch (error) {
+      console.error('Ошибка генерации заголовка:', error);
+      showNotice(`Ошибка: ${error.message}`);
+    } finally {
+      this.isGenerating = false;
+    }
+  }
 }
 
 class TitleSuggestionModal extends Modal {
   private suggestedTitle: string;
-  private onResult: (accepted: boolean) => void;
+  private onResult: (accepted: boolean, editedTitle?: string) => void;
+  private editor: Editor | null;
+  private view: MarkdownView | null;
+  private plugin: AutoTitlePlugin;
+  private titleInput: HTMLTextAreaElement;
 
-  constructor(app: App, suggestedTitle: string, onResult: (accepted: boolean) => void) {
+  constructor(app: App, suggestedTitle: string, onResult: (accepted: boolean, editedTitle?: string) => void, editor: Editor | null, view: MarkdownView | null, plugin: AutoTitlePlugin) {
     super(app);
     this.suggestedTitle = suggestedTitle;
     this.onResult = onResult;
+    this.editor = editor;
+    this.view = view;
+    this.plugin = plugin;
   }
 
   onOpen() {
@@ -468,28 +556,41 @@ class TitleSuggestionModal extends Modal {
 
     contentEl.createEl('h2', { text: 'Предлагаемый заголовок' });
     
-    const titleEl = contentEl.createEl('div', { 
-      text: this.suggestedTitle,
-      cls: 'suggested-title'
+    const inputContainer = contentEl.createDiv();
+    inputContainer.style.margin = '20px 0';
+    
+    this.titleInput = inputContainer.createEl('textarea', {
+      cls: 'suggested-title-input'
     });
-    titleEl.style.fontSize = '1.2em';
-    titleEl.style.fontWeight = 'bold';
-    titleEl.style.margin = '20px 0';
-    titleEl.style.padding = '10px';
-    titleEl.style.border = '1px solid var(--background-modifier-border)';
-    titleEl.style.borderRadius = '4px';
+    this.titleInput.value = this.suggestedTitle;
+    this.titleInput.style.width = '100%';
+    this.titleInput.style.minHeight = '60px';
+    this.titleInput.style.fontSize = '1.2em';
+    this.titleInput.style.fontWeight = 'bold';
+    this.titleInput.style.padding = '10px';
+    this.titleInput.style.border = '1px solid var(--background-modifier-border)';
+    this.titleInput.style.borderRadius = '4px';
+    this.titleInput.style.resize = 'vertical';
+    this.titleInput.style.fontFamily = 'var(--font-interface)';
+    this.titleInput.focus();
 
     const buttonsDiv = contentEl.createDiv({ cls: 'modal-button-container' });
     buttonsDiv.style.display = 'flex';
     buttonsDiv.style.gap = '10px';
     buttonsDiv.style.justifyContent = 'flex-end';
     buttonsDiv.style.marginTop = '20px';
+    buttonsDiv.style.flexWrap = 'wrap';
+
+    const regenerateButton = buttonsDiv.createEl('button', { text: 'Сгенерировать другой' });
+    regenerateButton.onclick = () => {
+      this.regenerateTitle();
+    };
 
     const acceptButton = buttonsDiv.createEl('button', { text: 'Принять' });
     acceptButton.classList.add('mod-cta');
     acceptButton.onclick = () => {
       this.close();
-      this.onResult(true);
+      this.onResult(true, this.titleInput.value);
     };
 
     const rejectButton = buttonsDiv.createEl('button', { text: 'Отклонить' });
@@ -498,8 +599,41 @@ class TitleSuggestionModal extends Modal {
       this.onResult(false);
     };
 
-    // Фокус на кнопке "Принять"
-    acceptButton.focus();
+    // Фокус на поле ввода
+    this.titleInput.focus();
+    this.titleInput.select();
+  }
+
+  private async regenerateTitle() {
+    try {
+      if (!this.editor || !this.view || !this.plugin) {
+        new Notice('Невозможно перегенерировать заголовок');
+        return;
+      }
+      
+      this.titleInput.disabled = true;
+      this.titleInput.value = 'Генерирую новый заголовок...';
+      
+      const content = this.editor.getValue();
+      const newTitle = await generateTitle(
+        content,
+        this.plugin.settings.apiKey,
+        this.plugin.settings.model,
+        this.plugin.settings.temperature + 0.2, // Увеличиваем температуру для другого стиля
+        this.plugin.settings.language
+      );
+      
+      this.suggestedTitle = newTitle;
+      this.titleInput.value = newTitle;
+      this.titleInput.disabled = false;
+      this.titleInput.focus();
+      this.titleInput.select();
+    } catch (error) {
+      console.error('Ошибка повторной генерации заголовка:', error);
+      this.titleInput.value = this.suggestedTitle;
+      this.titleInput.disabled = false;
+      new Notice('Ошибка при повторной генерации заголовка');
+    }
   }
 
   onClose() {

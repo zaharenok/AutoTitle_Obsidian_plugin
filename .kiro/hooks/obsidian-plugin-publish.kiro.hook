@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Obsidian Plugin Publisher",
+  "description": "Automatically copies only the necessary files (main.js, manifest.json, styles.css, README.md) to the AutoTitle-Obsidian-Plugin-Publish repository, commits them with a release message, and publishes to GitHub for the official Obsidian plugin directory.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "main.js",
+      "manifest.json",
+      "styles.css"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The Obsidian plugin build files have been updated. Please:\n\n1. Clone or access the repository: https://github.com/zaharenok/AutoTitle-Obsidian-Plugin-Publish.git\n2. Copy ONLY these files from the current project to that repository:\n   - main.js (compiled from main.ts)\n   - manifest.json\n   - styles.css (if it exists)\n   - README.publish.md (create/update it as a comprehensive Obsidian plugin instruction guide). And you have to mention latest GPT models.\n3. Do NOT include any source files (*.ts, node_modules, build configs, etc.)\n4. Write/update README.publish.md as a complete instruction guide for the Obsidian plugin\n5. Commit all changes with the message: \"Release for Obsidian plugin directory\"\n6. Push the changes to GitHub\n\nThe goal is to maintain a clean publication repository with only the files needed for the official Obsidian plugin directory."
+  }
+}

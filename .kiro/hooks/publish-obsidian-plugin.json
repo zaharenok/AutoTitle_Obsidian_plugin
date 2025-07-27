@@ -1,0 +1,8 @@
+{
+  "name": "Publish Obsidian Plugin",
+  "description": "Publishes the Obsidian plugin to the official repository with only required files",
+  "trigger": {
+    "type": "manual"
+  },
+  "request": "Создай публикационную версию плагина Obsidian:\n\n1. Создай файл README.publish.md как полноценную инструкцию для плагина Obsidian\n2. Склонируй репозиторий https://github.com/zaharenok/AutoTitle-Obsidian-Plugin-Publish.git\n3. Скопируй в него только необходимые файлы:\n   - main.js (скомпилированный файл)\n   - manifest.json\n   - styles.css (если есть)\n   - README.publish.md (переименовать в README.md)\n4. Закоммить изменения с сообщением 'Release for Obsidian plugin directory'\n5. Опубликовать на GitHub\n\nИсключить все исходники (*.ts, node_modules, конфиги сборки и прочее)."
+}

@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "Project Build Hook",
+  "description": "Automatically builds the project code after updates to generate main.js, manifest.json, and styles.css for installation",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "main.ts",
+      "package.json",
+      "tsconfig.json",
+      "esbuild.config.mjs",
+      "settings.ts",
+      "utils.ts",
+      "SettingTab.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The project has been updated. Please build the code for installation by generating the required files: main.js (compiled file), manifest.json, and styles.css. Run the build process to ensure all installation files are up to date."
+  }
+}

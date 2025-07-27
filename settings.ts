@@ -9,11 +9,12 @@ export interface AutoTitleSettings {
   minContentLength: number;
   triggerMode: 'manual' | 'auto' | 'semi-auto';
   showIndicator: boolean;
+  generationCount: number;
 }
 
 export const DEFAULT_SETTINGS: AutoTitleSettings = {
   apiKey: '',
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o-mini',
   temperature: 0.3,
   autoTrigger: false,
   language: 'auto',
@@ -21,5 +22,6 @@ export const DEFAULT_SETTINGS: AutoTitleSettings = {
   timeout: 5000,
   minContentLength: 100,
   triggerMode: 'manual',
-  showIndicator: true
+  showIndicator: true,
+  generationCount: 1
 };
