@@ -4,7 +4,7 @@
   "description": "Automatically builds the project code after updates to generate main.js, manifest.json, and styles.css for installation",
   "version": "1",
   "when": {
-    "type": "userTriggered",
+    "type": "fileCreated",
     "patterns": [
       "main.ts",
       "package.json",
