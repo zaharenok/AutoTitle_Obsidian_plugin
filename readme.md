@@ -8,7 +8,7 @@
 [![Version](https://img.shields.io/github/v/release/zaharenok/obsidian-autotitle?style=flat-square)](https://github.com/zaharenok/obsidian-autotitle/releases)
 [![Downloads](https://img.shields.io/github/downloads/zaharenok/obsidian-autotitle/total?style=flat-square)](https://github.com/zaharenok/obsidian-autotitle/releases)
 
-*Automatically generate meaningful titles for your Obsidian notes using OpenAI's powerful language models*
+*Automatically generate meaningful titles for your Obsidian notes using OpenAI's GPT latest models*
 
 [🚀 Installation](#-installation) • [⚙️ Configuration](#️-configuration) • [🎯 Usage](#-usage) • [🛠️ Development](#️-development)
 
@@ -16,7 +16,7 @@
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Title Generation** - Leverages GPT latest models (GPT-4o, GPT-4o-mini) to create meaningful, contextual titles
+- 🤖 **AI-Powered Title Generation** - Leverages GPT latest models including GPT-4o and GPT-4o-mini for intelligent, contextual title creation
 - 🔄 **Automatic Mode** - Suggests titles automatically as you write your notes
 - 🌍 **Multi-language Support** - Automatic language detection or manual language selection
 - ⚡ **Quick Commands** - Hotkeys for instant title generation
