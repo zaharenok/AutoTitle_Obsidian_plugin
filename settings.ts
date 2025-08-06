@@ -10,6 +10,7 @@ export interface AutoTitleSettings {
   triggerMode: 'manual' | 'auto' | 'semi-auto';
   showIndicator: boolean;
   generationCount: number;
+  maxTitleLength: number;
 }
 
 export const DEFAULT_SETTINGS: AutoTitleSettings = {
@@ -23,5 +24,6 @@ export const DEFAULT_SETTINGS: AutoTitleSettings = {
   minContentLength: 100,
   triggerMode: 'manual',
   showIndicator: true,
-  generationCount: 1
+  generationCount: 1,
+  maxTitleLength: 100
 };

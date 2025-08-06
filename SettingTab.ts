@@ -154,6 +154,45 @@ export class AutoTitleSettingTab extends PluginSettingTab {
           }
         }));
 
+    // Maximum Title Length
+    new Setting(containerEl)
+      .setName('Maximum Title Length')
+      .setDesc('Maximum number of characters for generated titles (titles will be truncated if longer)')
+      .addText(text => text
+        .setPlaceholder('100')
+        .setValue(this.plugin.settings.maxTitleLength.toString())
+        .onChange(async (value) => {
+          const length = parseInt(value);
+          if (!isNaN(length) && length > 0) {
+            this.plugin.settings.maxTitleLength = length;
+            await this.plugin.saveSettings();
+          }
+        }));
+
+    // Duplication Handling Section
+    containerEl.createEl('h3', { text: 'Duplication Handling' });
+    
+    const duplicationInfo = containerEl.createDiv();
+    duplicationInfo.innerHTML = `
+      <p>This plugin prevents duplicate titles from appearing both in the note title and content. 
+      Use the commands below to fix existing notes with duplicate titles.</p>
+    `;
+    
+    const duplicationButtons = containerEl.createDiv();
+    duplicationButtons.style.display = 'flex';
+    duplicationButtons.style.gap = '10px';
+    duplicationButtons.style.marginTop = '10px';
+    
+    const fixAllButton = duplicationButtons.createEl('button', { text: 'Fix All Notes' });
+    fixAllButton.onclick = async () => {
+      await this.plugin.fixAllDuplicatedTitles();
+    };
+    
+    const fixCurrentButton = duplicationButtons.createEl('button', { text: 'Fix Current Note' });
+    fixCurrentButton.onclick = async () => {
+      await this.plugin.fixCurrentNoteTitleFromSettings();
+    };
+
     // Info
     containerEl.createEl('h3', { text: 'Usage' });
     const infoDiv = containerEl.createDiv();
@@ -161,6 +200,7 @@ export class AutoTitleSettingTab extends PluginSettingTab {
       <p><strong>Hotkeys:</strong></p>
       <ul>
         <li><code>Ctrl+Shift+H</code> – Generate a title for the current note</li>
+        <li><code>Ctrl+Shift+Alt+H</code> – Generate title without confirmation</li>
       </ul>
       <p><strong>How to use:</strong></p>
       <ul>

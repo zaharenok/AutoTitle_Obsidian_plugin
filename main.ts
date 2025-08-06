@@ -2,6 +2,8 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginManifest, TFile
 import { AutoTitleSettings, DEFAULT_SETTINGS } from './settings';
 import { AutoTitleSettingTab } from './SettingTab';
 import { generateTitle, showNotice } from './utils';
+import { TitleManager } from './TitleManager';
+import { MigrationService } from './MigrationService';
 
 export default class AutoTitlePlugin extends Plugin {
   settings: AutoTitleSettings;
@@ -10,6 +12,8 @@ export default class AutoTitlePlugin extends Plugin {
   private generatedCountForFile: Map<string, number> = new Map();
   private statusBarItem: HTMLElement | null = null;
   private indicatorTimer: NodeJS.Timeout | null = null;
+  private titleManager: TitleManager;
+  private migrationService: MigrationService;
 
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
@@ -19,6 +23,13 @@ export default class AutoTitlePlugin extends Plugin {
     console.log('Загружается плагин AutoTitle');
 
     await this.loadSettings();
+    
+    // Инициализируем TitleManager
+    this.titleManager = new TitleManager(this.app);
+    this.titleManager.setSettings(this.settings);
+    
+    // Инициализируем MigrationService
+    this.migrationService = new MigrationService(this.app, this.titleManager);
 
     // Добавляем кнопку в ленту
     this.addRibbonIcon('heading', 'Генерировать заголовок', (evt: MouseEvent) => {
@@ -62,6 +73,24 @@ export default class AutoTitlePlugin extends Plugin {
           key: 'h'
         }
       ]
+    });
+
+    // Добавляем команду для исправления дублированных заголовков
+    this.addCommand({
+      id: 'fix-duplicate-titles',
+      name: 'Fix duplicate titles in all notes',
+      callback: () => {
+        this.showMigrationConfirmationModal();
+      }
+    });
+
+    // Добавляем команду для исправления текущей заметки
+    this.addCommand({
+      id: 'fix-current-note-title',
+      name: 'Fix duplicate title in current note',
+      editorCallback: (editor: Editor, view: MarkdownView) => {
+        this.fixCurrentNoteTitle(view);
+      }
     });
 
     // Добавляем вкладку настроек
@@ -128,6 +157,11 @@ export default class AutoTitlePlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+    
+    // Обновляем настройки в TitleManager
+    if (this.titleManager) {
+      this.titleManager.setSettings(this.settings);
+    }
     
     // Обновляем статус-бар
     this.updateStatusBar();
@@ -242,7 +276,7 @@ export default class AutoTitlePlugin extends Plugin {
       );
       
       if (this.settings.replaceMode) {
-        this.replaceTitle(editor, suggestedTitle);
+        await this.replaceTitle(editor, suggestedTitle, view);
         showNotice(`Заголовок обновлен: "${suggestedTitle}"`);
         // Увеличиваем счетчик генераций для этой заметки
         if (file) {
@@ -403,10 +437,10 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   private showTitleSuggestionModal(editor: Editor, view: MarkdownView, suggestedTitle: string) {
-    new TitleSuggestionModal(this.app, suggestedTitle, (accepted: boolean, editedTitle?: string) => {
+    new TitleSuggestionModal(this.app, suggestedTitle, async (accepted: boolean, editedTitle?: string) => {
       if (accepted) {
         const finalTitle = editedTitle || suggestedTitle;
-        this.replaceTitle(editor, finalTitle);
+        await this.replaceTitle(editor, finalTitle, view);
         showNotice(`Заголовок обновлен: "${finalTitle}"`);
         // Увеличиваем счетчик генераций для этой заметки
         const file = view?.file;
@@ -422,7 +456,47 @@ export default class AutoTitlePlugin extends Plugin {
     }, editor, view, this).open();
   }
 
-  private replaceTitle(editor: Editor, newTitle: string) {
+  private async replaceTitle(editor: Editor, newTitle: string, view: MarkdownView) {
+    const file = view?.file;
+    if (!file) {
+      // Fallback к старому методу, если файл недоступен
+      console.warn('Файл недоступен, используем fallback метод');
+      this.replaceTitleFallback(editor, newTitle);
+      return;
+    }
+
+    try {
+      // Используем TitleManager для установки заголовка без дублирования
+      const result = await this.titleManager.applyTitleWithoutDuplication(editor, file, newTitle);
+      
+      if (!result.success) {
+        console.warn('Не удалось применить заголовок через TitleManager, используем fallback:', result.error);
+        this.replaceTitleFallback(editor, newTitle);
+        
+        // Показываем предупреждение пользователю только в случае критической ошибки
+        if (result.error && result.error.includes('критическая')) {
+          showNotice(`Предупреждение: ${result.error}`);
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при применении заголовка:', error);
+      // Fallback к старому методу при ошибке
+      this.replaceTitleFallback(editor, newTitle);
+      
+      // Показываем ошибку пользователю только если fallback тоже не сработал
+      try {
+        // Проверяем, что fallback сработал
+        const content = editor.getValue();
+        if (!content.includes(newTitle)) {
+          showNotice('Не удалось установить заголовок. Попробуйте еще раз.');
+        }
+      } catch (fallbackError) {
+        showNotice('Критическая ошибка при установке заголовка');
+      }
+    }
+  }
+
+  private replaceTitleFallback(editor: Editor, newTitle: string) {
     const content = editor.getValue();
     const lines = content.split('\n');
     
@@ -439,20 +513,9 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   private insertTitleIntoContent(content: string, title: string): string {
-    const lines = content.split('\n');
-    // Если первая строка уже содержит нужный заголовок, ничего не делаем
-    if (lines[0] && lines[0].trim() === `# ${title}`) {
-      return content;
-    }
-    // Проверяем, есть ли уже заголовок в первой строке
-    if (lines[0] && lines[0].trim().startsWith('#')) {
-      // Заменяем существующий заголовок
-      lines[0] = `# ${title}`;
-    } else {
-      // Добавляем новый заголовок в начало
-      lines.unshift(`# ${title}`, '');
-    }
-    return lines.join('\n');
+    // Используем ContentProcessor для очистки дублированных заголовков
+    // Вместо добавления заголовка в содержимое, просто очищаем существующие дубликаты
+    return this.titleManager.removeDuplicateTitle(content, title);
   }
 
   private async renameFile(file: TFile, newTitle: string) {
@@ -510,7 +573,7 @@ export default class AutoTitlePlugin extends Plugin {
       );
 
       // Применяем заголовок напрямую без подтверждения
-      this.replaceTitle(editor, suggestedTitle);
+      await this.replaceTitle(editor, suggestedTitle, view);
       showNotice(`Заголовок обновлен: "${suggestedTitle}"`);
       
       // Увеличиваем счетчик генераций для этой заметки
@@ -529,6 +592,96 @@ export default class AutoTitlePlugin extends Plugin {
       showNotice(`Ошибка: ${error.message}`);
     } finally {
       this.isGenerating = false;
+    }
+  }
+
+  /**
+   * Показывает модальное окно подтверждения миграции
+   */
+  private async showMigrationConfirmationModal() {
+    try {
+      const stats = await this.migrationService.getDuplicationStatistics();
+      
+      if (stats.duplicated === 0) {
+        showNotice('Дублированных заголовков не найдено!');
+        return;
+      }
+
+      new MigrationConfirmationModal(
+        this.app,
+        stats,
+        async (confirmed: boolean) => {
+          if (confirmed) {
+            await this.runMigration();
+          }
+        }
+      ).open();
+    } catch (error) {
+      console.error('Ошибка при проверке дублированных заголовков:', error);
+      showNotice('Ошибка при проверке заметок');
+    }
+  }
+
+  /**
+   * Запускает миграцию всех заметок
+   */
+  private async runMigration() {
+    try {
+      showNotice('Начинаем исправление дублированных заголовков...');
+      
+      const result = await this.migrationService.fixAllDuplicatedTitles(true);
+      
+      if (result.errors.length > 0) {
+        console.error('Ошибки миграции:', result.errors);
+        showNotice(`Миграция завершена с ошибками. Исправлено: ${result.fixedFiles}, ошибок: ${result.errors.length}`);
+      } else {
+        showNotice(`Миграция успешно завершена! Исправлено ${result.fixedFiles} заметок.`);
+      }
+    } catch (error) {
+      console.error('Ошибка миграции:', error);
+      showNotice('Ошибка при выполнении миграции');
+    }
+  }
+
+  /**
+   * Исправляет дублированный заголовок в текущей заметке
+   */
+  private async fixCurrentNoteTitle(view: MarkdownView) {
+    if (!view.file) {
+      showNotice('Нет активной заметки');
+      return;
+    }
+
+    try {
+      const wasFixed = await this.migrationService.fixNoteTitle(view.file);
+      
+      if (wasFixed) {
+        showNotice('Дублированный заголовок удален из заметки');
+      } else {
+        showNotice('В этой заметке нет дублированного заголовка');
+      }
+    } catch (error) {
+      console.error('Ошибка исправления заметки:', error);
+      showNotice('Ошибка при исправлении заметки');
+    }
+  }
+
+  /**
+   * Public method to fix all duplicated titles (for settings UI)
+   */
+  async fixAllDuplicatedTitles() {
+    await this.runMigration();
+  }
+
+  /**
+   * Public method to fix current note title (for settings UI)
+   */
+  async fixCurrentNoteTitleFromSettings() {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (activeView) {
+      await this.fixCurrentNoteTitle(activeView);
+    } else {
+      showNotice('Нет активной заметки');
     }
   }
 }
@@ -634,6 +787,64 @@ class TitleSuggestionModal extends Modal {
       this.titleInput.disabled = false;
       new Notice('Ошибка при повторной генерации заголовка');
     }
+  }
+
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
+
+class MigrationConfirmationModal extends Modal {
+  private stats: {total: number, duplicated: number, percentage: number};
+  private onResult: (confirmed: boolean) => void;
+
+  constructor(app: App, stats: {total: number, duplicated: number, percentage: number}, onResult: (confirmed: boolean) => void) {
+    super(app);
+    this.stats = stats;
+    this.onResult = onResult;
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+
+    contentEl.createEl('h2', { text: 'Исправление дублированных заголовков' });
+    
+    const infoDiv = contentEl.createDiv();
+    infoDiv.style.margin = '20px 0';
+    
+    infoDiv.createEl('p', { 
+      text: `Найдено ${this.stats.duplicated} заметок с дублированными заголовками из ${this.stats.total} общего количества (${this.stats.percentage}%).`
+    });
+    
+    infoDiv.createEl('p', { 
+      text: 'Эта операция удалит дублированные H1 заголовки из содержимого заметок, оставив заголовки только в метаданных файлов.'
+    });
+    
+    infoDiv.createEl('p', { 
+      text: 'Операция безопасна и не затронет другие заголовки или содержимое заметок.',
+      cls: 'mod-warning'
+    });
+
+    const buttonsDiv = contentEl.createDiv({ cls: 'modal-button-container' });
+    buttonsDiv.style.display = 'flex';
+    buttonsDiv.style.gap = '10px';
+    buttonsDiv.style.justifyContent = 'flex-end';
+    buttonsDiv.style.marginTop = '20px';
+
+    const confirmButton = buttonsDiv.createEl('button', { text: 'Исправить заметки' });
+    confirmButton.classList.add('mod-cta');
+    confirmButton.onclick = () => {
+      this.close();
+      this.onResult(true);
+    };
+
+    const cancelButton = buttonsDiv.createEl('button', { text: 'Отмена' });
+    cancelButton.onclick = () => {
+      this.close();
+      this.onResult(false);
+    };
   }
 
   onClose() {

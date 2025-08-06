@@ -4,14 +4,11 @@
   "description": "Automatically creates proper git commits when files in the AutoTitleObsidian project are changed",
   "version": "1",
   "when": {
-    "type": "fileEdited",
+    "type": "userTriggered",
     "patterns": [
       "*.ts",
-      "*.js",
-      "*.json",
       "*.md",
-      "*.css",
-      "*.mjs"
+      "*.css"
     ]
   },
   "then": {
