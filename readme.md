@@ -16,7 +16,7 @@
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Title Generation** - Leverages GPT latest models to create meaningful, contextual titles
+- 🤖 **AI-Powered Title Generation** - Leverages GPT latest models (GPT-4o, GPT-4o-mini) to create meaningful, contextual titles
 - 🔄 **Automatic Mode** - Suggests titles automatically as you write your notes
 - 🌍 **Multi-language Support** - Automatic language detection or manual language selection
 - ⚡ **Quick Commands** - Hotkeys for instant title generation
