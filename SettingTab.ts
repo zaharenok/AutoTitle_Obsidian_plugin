@@ -169,6 +169,17 @@ export class AutoTitleSettingTab extends PluginSettingTab {
           }
         }));
 
+    // Include Existing Title
+    new Setting(containerEl)
+      .setName('Include Existing Title in Generation')
+      .setDesc('When enabled, the existing title will be considered during generation. When disabled, only note content is used.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.includeExistingTitle)
+        .onChange(async (value) => {
+          this.plugin.settings.includeExistingTitle = value;
+          await this.plugin.saveSettings();
+        }));
+
     // Duplication Handling Section
     containerEl.createEl('h3', { text: 'Duplication Handling' });
     
@@ -193,6 +204,33 @@ export class AutoTitleSettingTab extends PluginSettingTab {
       await this.plugin.fixCurrentNoteTitleFromSettings();
     };
 
+    // Reset rejected files section
+    containerEl.createEl('h3', { text: 'Auto-generation Control' });
+    const rejectedInfo = containerEl.createDiv();
+    rejectedInfo.innerHTML = `
+      <p>When you reject title suggestions, those notes are remembered and won't show auto-generation prompts again. 
+      Use the button below to reset this list and allow auto-generation for all notes again.</p>
+    `;
+    
+    const resetRejectedDiv = containerEl.createDiv();
+    resetRejectedDiv.style.marginTop = '10px';
+    
+    const resetRejectedButton = resetRejectedDiv.createEl('button', { text: 'Reset Rejected Files' });
+    resetRejectedButton.onclick = () => {
+      this.plugin.resetRejectedFiles();
+    };
+    
+    // Show count of rejected files
+    const rejectedCount = this.plugin.getRejectedFilesCount();
+    if (rejectedCount > 0) {
+      const countSpan = resetRejectedDiv.createEl('span', { 
+        text: ` (${rejectedCount} files currently rejected)` 
+      });
+      countSpan.style.marginLeft = '10px';
+      countSpan.style.color = 'var(--text-muted)';
+      countSpan.style.fontSize = '0.9em';
+    }
+
     // Info
     containerEl.createEl('h3', { text: 'Usage' });
     const infoDiv = containerEl.createDiv();
@@ -216,5 +254,49 @@ export class AutoTitleSettingTab extends PluginSettingTab {
         <li>Confirm or reject the suggested title</li>
       </ul>
     `;
+
+    // Support Section
+    containerEl.createEl('h3', { text: 'Support the Developer' });
+    const supportDiv = containerEl.createDiv();
+    supportDiv.style.display = 'flex';
+    supportDiv.style.gap = '15px';
+    supportDiv.style.alignItems = 'center';
+    supportDiv.style.marginTop = '10px';
+    
+    const githubLink = supportDiv.createEl('a', {
+      text: '⭐ GitHub',
+      href: 'https://github.com/zaharenok'
+    });
+    githubLink.style.textDecoration = 'none';
+    githubLink.style.padding = '8px 16px';
+    githubLink.style.backgroundColor = 'var(--interactive-accent)';
+    githubLink.style.color = 'var(--text-on-accent)';
+    githubLink.style.borderRadius = '4px';
+    githubLink.style.fontWeight = 'bold';
+    githubLink.style.whiteSpace = 'nowrap';
+    githubLink.style.display = 'inline-block';
+    githubLink.style.minWidth = 'fit-content';
+    githubLink.setAttribute('target', '_blank');
+    
+    const coffeeLink = supportDiv.createEl('a', {
+      text: '☕ Buy Me a Coffee',
+      href: 'https://buymeacoffee.com/olegzakhark'
+    });
+    coffeeLink.style.textDecoration = 'none';
+    coffeeLink.style.padding = '8px 16px';
+    coffeeLink.style.backgroundColor = '#FFDD00';
+    coffeeLink.style.color = '#000';
+    coffeeLink.style.borderRadius = '4px';
+    coffeeLink.style.fontWeight = 'bold';
+    coffeeLink.style.whiteSpace = 'nowrap';
+    coffeeLink.style.display = 'inline-block';
+    coffeeLink.style.minWidth = 'fit-content';
+    coffeeLink.setAttribute('target', '_blank');
+    
+    const supportText = supportDiv.createEl('span', {
+      text: 'If you find this plugin helpful, please consider supporting its development!'
+    });
+    supportText.style.fontSize = '0.9em';
+    supportText.style.color = 'var(--text-muted)';
   }
 }

@@ -23,10 +23,16 @@ export function detectLanguage(text: string): string {
   return languageMap[detected] || 'английский';
 }
 
-export function cleanContent(content: string): string {
-  // Удаляем markdown разметку и очищаем текст
-  return content
-    .replace(/#{1,6}\s/g, '') // заголовки
+export function cleanContent(content: string, includeExistingTitle: boolean = false): string {
+  let cleanedContent = content;
+  
+  if (!includeExistingTitle) {
+    // Удаляем только заголовки, если не нужно их учитывать
+    cleanedContent = cleanedContent.replace(/#{1,6}\s/g, '');
+  }
+  
+  // Удаляем остальную markdown разметку и очищаем текст
+  return cleanedContent
     .replace(/\*\*(.*?)\*\*/g, '$1') // жирный текст
     .replace(/\*(.*?)\*/g, '$1') // курсив
     .replace(/`(.*?)`/g, '$1') // код
@@ -38,7 +44,7 @@ export function cleanContent(content: string): string {
     .trim();
 }
 
-export async function generateTitle(content: string, apiKey: string, model: string, temperature: number, language: string): Promise<string> {
+export async function generateTitle(content: string, apiKey: string, model: string, temperature: number, language: string, includeExistingTitle: boolean = false): Promise<string> {
   if (!apiKey) {
     throw new Error('API ключ OpenAI не настроен');
   }
@@ -47,10 +53,18 @@ export async function generateTitle(content: string, apiKey: string, model: stri
     throw new Error('Недостаточно содержимого для генерации заголовка');
   }
   
-  const cleanedContent = cleanContent(content);
+  const cleanedContent = cleanContent(content, includeExistingTitle);
   const detectedLang = language === 'auto' ? detectLanguage(cleanedContent) : language;
   
-  const prompt = `Сгенерируй краткий и содержательный заголовок для следующего текста на языке "${detectedLang}". Заголовок должен быть максимально информативным и отражать основную тему содержимого. Верни только заголовок, без дополнительных объяснений:
+  let prompt = `Сгенерируй краткий и содержательный заголовок для следующего текста на языке "${detectedLang}". Заголовок должен быть максимально информативным и отражать основную тему содержимого.`;
+  
+  if (includeExistingTitle) {
+    prompt += ` Учти существующий заголовок в тексте, но создай более подходящий вариант.`;
+  } else {
+    prompt += ` Игнорируй любые существующие заголовки и сосредоточься только на содержании.`;
+  }
+  
+  prompt += ` Верни только заголовок, без дополнительных объяснений:
 
 ${cleanedContent.substring(0, 2000)}`;
 
