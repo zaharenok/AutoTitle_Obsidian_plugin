@@ -1,103 +1,103 @@
-# 🎉 Проект AutoTitle - Плагин для Obsidian ЗАВЕРШЕН!
+# 🎉 AutoTitle Project - Obsidian Plugin COMPLETED!
 
-## ✅ Что было реализовано
+## ✅ What's Been Implemented
 
-### 📁 Структура проекта
+### 📁 Project Structure
 ```
 obsidian-autotitle/
-├── main.ts              # Основная логика плагина (12.7KB)
-├── main.js              # Собранный файл (527KB)
-├── settings.ts          # Интерфейс настроек
-├── SettingTab.ts        # UI панель настроек (5.3KB)
-├── utils.ts             # Утилиты для работы с AI (3.7KB)
-├── styles.css           # Стили плагина (3KB)
-├── manifest.json        # Манифест Obsidian
-├── package.json         # Зависимости Node.js
-├── tsconfig.json        # Конфигурация TypeScript
-├── esbuild.config.mjs   # Конфигурация сборки
-├── version-bump.mjs     # Утилита версионирования
-├── versions.json        # История версий
-├── .gitignore          # Git исключения
-├── LICENSE             # MIT лицензия
-├── README.md           # Документация (7KB)
-└── INSTALL.md          # Инструкции по установке (5.5KB)
+├── main.ts              # Main plugin logic (12.7KB)
+├── main.js              # Compiled file (527KB)
+├── settings.ts          # Settings interface
+├── SettingTab.ts        # Settings UI panel (5.3KB)
+├── utils.ts             # AI utilities (3.7KB)
+├── styles.css           # Plugin styles (3KB)
+├── manifest.json        # Obsidian manifest
+├── package.json         # Node.js dependencies
+├── tsconfig.json        # TypeScript config
+├── esbuild.config.mjs   # Build configuration
+├── version-bump.mjs     # Versioning utility
+├── versions.json        # Version history
+├── .gitignore          # Git exclusions
+├── LICENSE             # MIT License
+├── README.md           # Documentation (7KB)
+└── INSTALL.md          # Installation guide (5.5KB)
 ```
 
-### 🚀 Основные функции
-1. **🤖 AI генерация заголовков** - Интеграция с OpenAI API (GPT-4o, GPT-4o-mini, GPT-4 Turbo)
-2. **⚡ Горячие клавиши** - `Ctrl+Shift+H` для быстрой генерации
-3. **🔄 Автоматический режим** - Предложения при наборе текста
-4. **🌍 Многоязычность** - Автоопределение языка + ручная настройка
-5. **🎛️ Гибкие настройки** - Модель, температура, таймауты
-6. **📝 Умная замена** - Обновление/создание заголовков
-7. **🎨 Красивый UI** - Модальные окна, стили, иконки
+### 🚀 Key Features
+1. **🤖 AI Title Generation** - OpenAI API integration (GPT-4o, GPT-4o-mini, GPT-4 Turbo)
+2. **⚡ Hotkeys** - `Ctrl+Shift+H` for quick generation
+3. **🔄 Auto Mode** - Suggestions while typing
+4. **🌍 Multilingual** - Auto-detection + manual language setting
+5. **🎛️ Flexible Settings** - Model, temperature, timeouts
+6. **📝 Smart Replacement** - Update/create titles intelligently
+7. **🎨 Beautiful UI** - Modals, styles, icons
 
-### 🛠️ Технические особенности
-- **TypeScript** - Типизированный код для надежности
-- **ESBuild** - Быстрая сборка и оптимизация
-- **Franc** - Автоматическое определение языка
-- **Obsidian API** - Полная интеграция с платформой
-- **Error handling** - Обработка ошибок API и сети
-- **Settings persistence** - Сохранение настроек пользователя
+### 🛠️ Technical Features
+- **TypeScript** - Type-safe code for reliability
+- **ESBuild** - Fast builds and optimization
+- **Franc** - Automatic language detection
+- **Obsidian API** - Full platform integration
+- **Error handling** - API and network error management
+- **Settings persistence** - User preferences saved
 
-### 🎯 Способы использования
-1. **Кнопка в ленте** - Быстрый доступ из UI
-2. **Команды** - Через палитру команд Obsidian
-3. **Контекстное меню** - Правый клик на файлах
-4. **Автоматически** - При наборе минимум 50 символов
-5. **Горячие клавиши** - Мгновенный вызов
+### 🎯 How to Use
+1. **Ribbon Button** - Quick access from UI
+2. **Commands** - Via Obsidian command palette
+3. **Context Menu** - Right-click on files
+4. **Automatically** - When typing 50+ characters
+5. **Hotkeys** - Instant access
 
-### ⚙️ Настройки плагина
-- API ключ OpenAI
-- Выбор модели (GPT-4o/GPT-4o-mini/GPT-4 Turbo/GPT-4)
-- Творческость (температура 0.0-1.0)
-- Автогенерация вкл/выкл
-- Язык по умолчанию (авто + 6 языков)
-- Режим замены
-- Таймаут автогенерации
+### ⚙️ Plugin Settings
+- OpenAI API Key
+- Model selection (GPT-4o/GPT-4o-mini/GPT-4 Turbo/GPT-4)
+- Creativity (temperature 0.0-1.0)
+- Auto-generation on/off
+- Default language (auto + 6 languages)
+- Replacement mode
+- Auto-generation timeout
 
-## 🔧 Готово к использованию
+## 🔧 Ready to Use
 
-### Для пользователей:
-1. Скопируйте `main.js`, `manifest.json`, `styles.css` в `.obsidian/plugins/autotitle/`
-2. Перезапустите Obsidian
-3. Включите плагин в настройках
-4. Добавьте OpenAI API ключ
-5. Начните использовать!
+### For Users:
+1. Copy `main.js`, `manifest.json`, `styles.css` to `.obsidian/plugins/autotitle/`
+2. Restart Obsidian
+3. Enable the plugin in settings
+4. Add your OpenAI API key
+5. Start using!
 
-### Для разработчиков:
+### For Developers:
 ```bash
-npm install          # Установка зависимостей
-npm run dev         # Режим разработки (watch)
-npm run build       # Сборка релиза
+npm install          # Install dependencies
+npm run dev         # Development mode (watch)
+npm run build       # Build for release
 ```
 
-## 📊 Статистика проекта
-- **Строк кода**: ~600 строк TypeScript
-- **Размер собранного файла**: 527KB
-- **Зависимости**: 154 пакета
-- **Функций**: 15+ основных функций
-- **Компонентов UI**: 3 основных компонента
-- **Языков поддержки**: 7 языков
+## 📊 Project Statistics
+- **Lines of Code**: ~600 TypeScript
+- **Build Size**: 527KB
+- **Dependencies**: 154 packages
+- **Functions**: 15+ core functions
+- **UI Components**: 3 main components
+- **Supported Languages**: 7 languages
 
-## 🎨 UX/UI особенности
-- Модальные окна с предпросмотром заголовков
-- Адаптивные уведомления (Notice)
-- Стилизованные элементы управления
-- Индикаторы загрузки и статуса
-- Интуитивная панель настроек
-- Иконки и визуальные элементы
+## 🎨 UX/UI Features
+- Modal windows with title previews
+- Responsive notifications (Notice)
+- Styled form controls
+- Loading and status indicators
+- Intuitive settings panel
+- Icons and visual elements
 
-## 🔮 Возможности расширения
-- Поддержка локальных моделей (Ollama, LM Studio)
-- Режимы генерации (академический, креативный, clickbait)
-- История заголовков
-- Генерация тегов
-- Батчевая обработка файлов
-- Кастомные промпты
+## 🔮 Future Possibilities
+- Local model support (Ollama, LM Studio)
+- Generation modes (academic, creative, clickbait)
+- Title history
+- Tag generation
+- Batch file processing
+- Custom prompts
 
-## 🏆 Результат
-**Полнофункциональный плагин для Obsidian готов к использованию!**
+## 🏆 The Result
+**A fully functional Obsidian plugin ready to use!**
 
 Плагин AutoTitle предоставляет пользователям мощный инструмент для автоматической генерации заголовков с помощью искусственного интеллекта, значительно ускоряя процесс создания и организации заметок в Obsidian.
 

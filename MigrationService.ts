@@ -2,7 +2,7 @@ import { App, TFile, Notice } from 'obsidian';
 import { TitleManager } from './TitleManager';
 
 /**
- * Результат миграции
+ * Migration result
  */
 export interface MigrationResult {
   totalFiles: number;
@@ -12,7 +12,7 @@ export interface MigrationResult {
 }
 
 /**
- * MigrationService - сервис для массового исправления заметок с дублированными заголовками
+ * MigrationService - service for bulk fixing notes with duplicate titles
  */
 export class MigrationService {
   private app: App;
@@ -24,8 +24,8 @@ export class MigrationService {
   }
 
   /**
-   * Исправляет все заметки с дублированными заголовками
-   * @param showProgress - показывать ли прогресс пользователю
+   * Fixes all notes with duplicate titles
+   * @param showProgress - whether to show progress to the user
    * @returns Promise<MigrationResult>
    */
   async fixAllDuplicatedTitles(showProgress: boolean = true): Promise<MigrationResult> {
@@ -37,15 +37,15 @@ export class MigrationService {
     };
 
     try {
-      // Получаем все markdown файлы
+      // Get all markdown files
       const markdownFiles = this.app.vault.getMarkdownFiles();
       result.totalFiles = markdownFiles.length;
 
       if (showProgress) {
-        new Notice(`Начинаем проверку ${result.totalFiles} заметок...`);
+        new Notice(`Starting check of ${result.totalFiles} notes...`);
       }
 
-      // Обрабатываем файлы батчами для лучшей производительности
+      // Process files in batches for better performance
       const batchSize = 10;
       for (let i = 0; i < markdownFiles.length; i += batchSize) {
         const batch = markdownFiles.slice(i, i + batchSize);
@@ -59,47 +59,47 @@ export class MigrationService {
               result.fixedFiles++;
             }
           } catch (error) {
-            result.errors.push(`${file.path}: ${error.message}`);
+            result.errors.push(`Migration error: ${error.message}`);
           }
         }
 
-        // Показываем прогресс каждые 50 файлов
+        // Show progress every 50 files
         if (showProgress && (i + batchSize) % 50 === 0) {
-          new Notice(`Обработано ${result.processedFiles} из ${result.totalFiles} заметок...`);
+          new Notice(`Processed ${result.processedFiles} out of ${result.totalFiles} notes...`);
         }
 
-        // Небольшая пауза между батчами, чтобы не блокировать UI
+        // Small pause between batches to avoid blocking the UI
         await this.sleep(10);
       }
 
       if (showProgress) {
-        new Notice(`Миграция завершена! Исправлено ${result.fixedFiles} заметок из ${result.processedFiles} обработанных.`);
+        new Notice(`Migration completed! Fixed ${result.fixedFiles} out of ${result.processedFiles} processed notes.`);
       }
 
     } catch (error) {
-      result.errors.push(`Общая ошибка миграции: ${error.message}`);
+      result.errors.push(`General migration error: ${error.message}`);
     }
 
     return result;
   }
 
   /**
-   * Исправляет конкретную заметку
-   * @param file - файл заметки
-   * @returns Promise<boolean> - true, если заметка была исправлена
+   * Fixes a specific note
+   * @param file - note file
+   * @returns Promise<boolean> - true if the note was fixed
    */
   async fixNoteTitle(file: TFile): Promise<boolean> {
     try {
       return await this.titleManager.detectAndCleanupDuplicates(file);
     } catch (error) {
-      console.error(`Ошибка исправления заметки ${file.path}:`, error);
-      throw new Error(`Не удалось исправить заметку: ${error.message}`);
+      console.error(`Error scanning file ${file.path}:`, error);
+      throw new Error(`Failed to fix note: ${error.message}`);
     }
   }
 
   /**
-   * Сканирует заметки на наличие дублированных заголовков
-   * @returns Promise<TFile[]> - список файлов с дублированными заголовками
+   * Scans notes for duplicated titles
+   * @returns Promise<TFile[]> - list of files with duplicated titles
    */
   async scanForDuplicatedTitles(): Promise<TFile[]> {
     const duplicatedFiles: TFile[] = [];
@@ -114,7 +114,7 @@ export class MigrationService {
           duplicatedFiles.push(file);
         }
       } catch (error) {
-        console.error(`Ошибка сканирования файла ${file.path}:`, error);
+        console.error(`Error scanning file ${file.path}:`, error);
       }
     }
 
@@ -122,7 +122,7 @@ export class MigrationService {
   }
 
   /**
-   * Получает статистику по дублированным заголовкам
+   * Gets statistics on duplicated titles
    * @returns Promise<{total: number, duplicated: number, percentage: number}>
    */
   async getDuplicationStatistics(): Promise<{total: number, duplicated: number, percentage: number}> {
@@ -137,7 +137,7 @@ export class MigrationService {
   }
 
   /**
-   * Проверяет, нужна ли миграция
+   * Checks if migration is needed
    * @returns Promise<boolean>
    */
   async needsMigration(): Promise<boolean> {
@@ -146,8 +146,8 @@ export class MigrationService {
   }
 
   /**
-   * Создает резервную копию заметки перед изменением
-   * @param file - файл заметки
+   * Creates a backup of a note before making changes
+   * @param file - note file
    * @returns Promise<void>
    */
   private async createBackup(file: TFile): Promise<void> {
@@ -156,13 +156,13 @@ export class MigrationService {
       const backupPath = `${file.path}.backup-${Date.now()}`;
       await this.app.vault.create(backupPath, content);
     } catch (error) {
-      console.error(`Не удалось создать резервную копию для ${file.path}:`, error);
+      console.error(`Failed to create backup for ${file.path}:`, error);
     }
   }
 
   /**
-   * Пауза для предотвращения блокировки UI
-   * @param ms - миллисекунды
+   * Pause to prevent UI blocking
+   * @param ms - milliseconds to pause
    * @returns Promise<void>
    */
   private sleep(ms: number): Promise<void> {

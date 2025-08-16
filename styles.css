@@ -43,7 +43,7 @@
   background-color: var(--interactive-accent-hover);
 }
 
-/* Статус индикатор для генерации */
+/* Generation status indicator */
 .autotitle-status {
   display: inline-flex;
   align-items: center;
@@ -85,7 +85,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Настройки плагина */
+/* Plugin settings */
 .autotitle-settings h2 {
   border-bottom: 1px solid var(--background-modifier-border);
   padding-bottom: 8px;

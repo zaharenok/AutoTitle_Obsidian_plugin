@@ -8,63 +8,63 @@ export function detectLanguage(text: string): string {
   
   const detected = franc(text);
   
-  // Маппинг ISO 639-3 кодов на читаемые названия языков
+  // Mapping ISO 639-3 codes to readable language names
   const languageMap: { [key: string]: string } = {
-    'rus': 'русский',
-    'eng': 'английский',
-    'fra': 'французский',
-    'deu': 'немецкий',
-    'spa': 'испанский',
-    'ita': 'итальянский',
-    'por': 'португальский',
+    'rus': 'Russian',
+    'eng': 'English',
+    'fra': 'French',
+    'deu': 'German',
+    'spa': 'Spanish',
+    'ita': 'Italian',
+    'por': 'Portuguese',
     'und': 'unknown'
   };
   
-  return languageMap[detected] || 'английский';
+  return languageMap[detected] || 'English';
 }
 
 export function cleanContent(content: string, includeExistingTitle: boolean = false): string {
   let cleanedContent = content;
   
   if (!includeExistingTitle) {
-    // Удаляем только заголовки, если не нужно их учитывать
+    // Remove only headers if we don't need to consider them
     cleanedContent = cleanedContent.replace(/#{1,6}\s/g, '');
   }
   
-  // Удаляем остальную markdown разметку и очищаем текст
+  // Remove remaining markdown formatting and clean up the text
   return cleanedContent
-    .replace(/\*\*(.*?)\*\*/g, '$1') // жирный текст
-    .replace(/\*(.*?)\*/g, '$1') // курсив
-    .replace(/`(.*?)`/g, '$1') // код
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // ссылки
-    .replace(/!\[.*?\]\(.*?\)/g, '') // изображения
-    .replace(/^\s*[-*+]\s/gm, '') // списки
-    .replace(/^\s*\d+\.\s/gm, '') // нумерованные списки
-    .replace(/\n{3,}/g, '\n\n') // множественные переносы
+    .replace(/\*\*(.*?)\*\*/g, '$1') // bold text
+    .replace(/\*(.*?)\*/g, '$1') // italic
+    .replace(/`(.*?)`/g, '$1') // code
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
+    .replace(/!\[.*?\]\(.*?\)/g, '') // images
+    .replace(/^\s*[-*+]\s/gm, '') // lists
+    .replace(/^\s*\d+\.\s/gm, '') // numbered lists
+    .replace(/\n{3,}/g, '\n\n') // multiple line breaks
     .trim();
 }
 
 export async function generateTitle(content: string, apiKey: string, model: string, temperature: number, language: string, includeExistingTitle: boolean = false): Promise<string> {
   if (!apiKey) {
-    throw new Error('API ключ OpenAI не настроен');
+    throw new Error('OpenAI API key is not configured');
   }
   
   if (!content || content.trim().length < 10) {
-    throw new Error('Недостаточно содержимого для генерации заголовка');
+    throw new Error('Not enough content to generate a title');
   }
   
   const cleanedContent = cleanContent(content, includeExistingTitle);
   const detectedLang = language === 'auto' ? detectLanguage(cleanedContent) : language;
   
-  let prompt = `Сгенерируй краткий и содержательный заголовок для следующего текста на языке "${detectedLang}". Заголовок должен быть максимально информативным и отражать основную тему содержимого.`;
+  let prompt = `Generate a concise and meaningful title for the following text in "${detectedLang}". The title should be as informative as possible and reflect the main theme of the content.`;
   
   if (includeExistingTitle) {
-    prompt += ` Учти существующий заголовок в тексте, но создай более подходящий вариант.`;
+    prompt += ` Consider the existing title in the text, but create a more suitable version.`;
   } else {
-    prompt += ` Игнорируй любые существующие заголовки и сосредоточься только на содержании.`;
+    prompt += ` Ignore any existing titles and focus only on the content.`;
   }
   
-  prompt += ` Верни только заголовок, без дополнительных объяснений:
+  prompt += ` Return only the title, without any additional explanations:
 
 ${cleanedContent.substring(0, 2000)}`;
 
@@ -90,21 +90,21 @@ ${cleanedContent.substring(0, 2000)}`;
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`OpenAI API ошибка: ${errorData.error?.message || response.statusText}`);
+      throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
     const title = data.choices[0]?.message?.content?.trim();
     
     if (!title) {
-      throw new Error('Не удалось получить заголовок от OpenAI');
+      throw new Error('Failed to get title from OpenAI');
     }
     
-    // Очищаем заголовок от кавычек и лишних символов
+    // Clean up the title by removing quotes and extra characters
     return title.replace(/^["']|["']$/g, '').trim();
     
   } catch (error) {
-    console.error('Ошибка при генерации заголовка:', error);
+    console.error('Error generating title:', error);
     throw error;
   }
 }

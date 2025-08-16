@@ -1,61 +1,61 @@
-# Обновление моделей OpenAI в AutoTitle Plugin
+# OpenAI Models Update in AutoTitle Plugin
 
-## Что было изменено
+## What's Changed
 
-### Обновленные модели
-- **По умолчанию**: `gpt-3.5-turbo` → `gpt-4o-mini`
-- **Рекомендуемая**: `gpt-4o` (лучшее качество)
-- **Экономичная**: `gpt-4o-mini` (быстрая и дешевая)
-- **Мощная**: `gpt-4-turbo` (для сложных задач)
-- **Классическая**: `gpt-4` (стабильная)
-- **Устаревшая**: `gpt-3.5-turbo` (помечена как Legacy)
+### Updated Models
+- **Default**: `gpt-3.5-turbo` → `gpt-4o-mini`
+- **Recommended**: `gpt-4o` (best quality)
+- **Cost-effective**: `gpt-4o-mini` (fast and affordable)
+- **Powerful**: `gpt-4-turbo` (for complex tasks)
+- **Classic**: `gpt-4` (stable)
+- **Legacy**: `gpt-3.5-turbo` (marked as Legacy)
 
-### Измененные файлы
-1. **settings.ts** - обновлена модель по умолчанию
-2. **SettingTab.ts** - обновлен список доступных моделей с описаниями
-3. **manifest.json** - обновлено описание плагина
-4. **readme.md** - обновлены упоминания моделей в документации
-5. **PROJECT_SUMMARY.md** - обновлена информация о поддерживаемых моделях
-6. **INSTALL.md** - обновлены рекомендации по использованию
-7. **publish-repo/** - обновлены файлы для публикации
-8. **main.js** - пересобран с новыми настройками
+### Modified Files
+1. **settings.ts** - updated default model
+2. **SettingTab.ts** - updated available models list with descriptions
+3. **manifest.json** - updated plugin description
+4. **readme.md** - updated model references in documentation
+5. **PROJECT_SUMMARY.md** - updated supported models information
+6. **INSTALL.md** - updated usage recommendations
+7. **publish-repo/** - updated files for publishing
+8. **main.js** - rebuilt with new settings
 
-### Преимущества обновления
+### Update Benefits
 
-#### GPT-4o-mini (новая модель по умолчанию)
-- ✅ Значительно быстрее GPT-3.5-turbo
-- ✅ Лучшее качество генерации заголовков
-- ✅ Более экономичная по сравнению с GPT-4
-- ✅ Поддерживает больший контекст
-- ✅ Меньше ошибок и галлюцинаций
+#### GPT-4o-mini (new default model)
+- ✅ Significantly faster than GPT-3.5-turbo
+- ✅ Better title generation quality
+- ✅ More cost-effective compared to GPT-4
+- ✅ Supports larger context
+- ✅ Fewer errors and hallucinations
 
-#### GPT-4o (рекомендуемая для качества)
-- ✅ Лучшее понимание контекста
-- ✅ Более креативные и точные заголовки
-- ✅ Отличная работа с многоязычным контентом
-- ✅ Поддержка изображений (для будущих версий)
+#### GPT-4o (recommended for quality)
+- ✅ Better context understanding
+- ✅ More creative and accurate titles
+- ✅ Excellent with multilingual content
+- ✅ Image support (for future versions)
 
-### Обратная совместимость
-- ✅ Старые настройки пользователей сохранятся
-- ✅ GPT-3.5-turbo остается доступной как "Legacy" опция
-- ✅ Все существующие функции работают без изменений
+### Backward Compatibility
+- ✅ User settings will be preserved
+- ✅ GPT-3.5-turbo remains available as a "Legacy" option
+- ✅ All existing functionality works without changes
 
-### Рекомендации для пользователей
+### User Recommendations
 
-**Для обычного использования:**
-- Используйте `gpt-4o-mini` (по умолчанию) - оптимальный баланс скорости и качества
+**For everyday use:**
+- Use `gpt-4o-mini` (default) - optimal balance of speed and quality
 
-**Для максимального качества:**
-- Используйте `gpt-4o` - лучшие результаты для сложного контента
+**For maximum quality:**
+- Use `gpt-4o` - best results for complex content
 
-**Для экономии:**
-- Используйте `gpt-4o-mini` - самая экономичная современная модель
+**For cost savings:**
+- Use `gpt-4o-mini` - most cost-effective modern model
 
-**Для совместимости:**
-- Оставьте `gpt-3.5-turbo` только если есть специфические требования
+**For compatibility:**
+- Keep `gpt-3.5-turbo` only if you have specific requirements
 
-## Дата обновления
-27 января 2025
+## Update Date
+January 27, 2025
 
-## Статус
-✅ Обновление завершено и готово к использованию
+## Status
+✅ Update completed and ready to use

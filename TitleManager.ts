@@ -3,7 +3,7 @@ import { ContentProcessor } from './ContentProcessor';
 import { AutoTitleSettings } from './settings';
 
 /**
- * Результат обработки заголовка
+ * Title processing result
  */
 export interface TitleProcessingResult {
   success: boolean;
@@ -15,7 +15,7 @@ export interface TitleProcessingResult {
 }
 
 /**
- * Результат проверки дублирования
+ * Duplication check result
  */
 export interface DuplicationCheckResult {
   hasDuplication: boolean;
@@ -25,7 +25,7 @@ export interface DuplicationCheckResult {
 }
 
 /**
- * TitleManager - сервис для управления заголовками заметок через Obsidian API
+ * TitleManager - service for managing note titles via Obsidian API
  */
 export class TitleManager {
   private app: App;
@@ -38,22 +38,22 @@ export class TitleManager {
   }
 
   /**
-   * Устанавливает настройки плагина
-   * @param settings - настройки плагина
+   * Sets plugin settings
+   * @param settings - plugin settings
    */
   setSettings(settings: AutoTitleSettings) {
     this.settings = settings;
   }
 
   /**
-   * Устанавливает заголовок заметки через Obsidian API
-   * @param file - файл заметки
-   * @param title - новый заголовок
-   * @returns Promise<void>
+   * Sets the note title via Obsidian API
+   * @param file - note file
+   * @param title - new title
+   * @returns Promise that resolves when the title is set
    */
   async setNoteTitle(file: TFile, title: string): Promise<void> {
     try {
-      // Валидируем и обрезаем заголовок
+      // Validate and truncate the title
       const maxLength = this.settings?.maxTitleLength || 100;
       const validatedTitle = this.contentProcessor.validateAndTruncateTitle(title, maxLength);
       

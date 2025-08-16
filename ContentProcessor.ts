@@ -1,14 +1,14 @@
 /**
- * ContentProcessor - утилитарный класс для обработки содержимого заметок
- * и обнаружения дублированных заголовков
+ * ContentProcessor - utility class for processing note content
+ * and detecting duplicated titles
  */
 export class ContentProcessor {
   
   /**
-   * Очищает содержимое от дублированных заголовков
-   * @param content - содержимое заметки
-   * @param noteTitle - заголовок заметки
-   * @returns очищенное содержимое
+   * Cleans content from duplicated titles
+   * @param content - note content
+   * @param noteTitle - note title
+   * @returns cleaned content
    */
   cleanDuplicatedTitles(content: string, noteTitle: string): string {
     if (!content || !noteTitle) {
@@ -18,9 +18,9 @@ export class ContentProcessor {
     const lines = content.split('\n');
     const firstLine = lines[0]?.trim();
     
-    // Проверяем, является ли первая строка H1 заголовком, совпадающим с заголовком заметки
+    // Check if the first line is an H1 title that matches the note title
     if (this.isH1Title(firstLine) && this.extractTitleText(firstLine) === noteTitle) {
-      // Удаляем первую строку и следующую пустую строку, если она есть
+      // Remove the first line and the following empty line if it exists
       lines.shift();
       if (lines[0] && lines[0].trim() === '') {
         lines.shift();
@@ -31,9 +31,9 @@ export class ContentProcessor {
   }
 
   /**
-   * Извлекает первый H1 заголовок из содержимого
-   * @param content - содержимое заметки
-   * @returns текст заголовка или null, если не найден
+   * Extracts the first H1 title from the content
+   * @param content - note content
+   * @returns title text or null if not found
    */
   extractFirstH1Title(content: string): string | null {
     if (!content) {
@@ -51,9 +51,9 @@ export class ContentProcessor {
   }
 
   /**
-   * Проверяет, является ли первая строка H1 заголовком
-   * @param content - содержимое заметки
-   * @returns true, если первая строка - H1 заголовок
+   * Checks if the first line is an H1 title
+   * @param content - note content
+   * @returns true if the first line is an H1 title
    */
   isFirstLineH1Title(content: string): boolean {
     if (!content) {
@@ -65,10 +65,10 @@ export class ContentProcessor {
   }
 
   /**
-   * Проверяет, есть ли дублированный заголовок в содержимом
-   * @param content - содержимое заметки
-   * @param noteTitle - заголовок заметки
-   * @returns true, если есть дублирование
+   * Checks if there is a duplicate title in the content
+   * @param content - note content
+   * @param noteTitle - note title
+   * @returns true if there is a duplicate
    */
   hasDuplicateTitle(content: string, noteTitle: string): boolean {
     if (!content || !noteTitle) {
@@ -80,9 +80,9 @@ export class ContentProcessor {
   }
 
   /**
-   * Проверяет, является ли строка H1 заголовком
-   * @param line - строка для проверки
-   * @returns true, если строка является H1 заголовком
+   * Checks if a line is an H1 title
+   * @param line - line to check
+   * @returns true if the line is an H1 title
    */
   private isH1Title(line: string): boolean {
     if (!line) {
@@ -93,9 +93,9 @@ export class ContentProcessor {
   }
 
   /**
-   * Извлекает текст заголовка из markdown строки
-   * @param line - строка с заголовком
-   * @returns текст заголовка без markdown разметки
+   * Extracts the title text from a markdown line
+   * @param line - line containing the title
+   * @returns title text without markdown formatting
    */
   private extractTitleText(line: string): string {
     if (!line) {
@@ -106,10 +106,10 @@ export class ContentProcessor {
   }
 
   /**
-   * Валидирует и обрезает заголовок до максимальной длины
-   * @param title - исходный заголовок
-   * @param maxLength - максимальная длина (по умолчанию 100)
-   * @returns обрезанный заголовок
+   * Validates and truncates a title to a maximum length
+   * @param title - original title
+   * @param maxLength - maximum length (default 100)
+   * @returns truncated title
    */
   validateAndTruncateTitle(title: string, maxLength: number = 100): string {
     if (!title) {
@@ -122,7 +122,7 @@ export class ContentProcessor {
       return cleanTitle;
     }
 
-    // Обрезаем по словам, чтобы не разрывать слова посередине
+    // Truncate by words to avoid breaking words in the middle
     const words = cleanTitle.split(' ');
     let truncated = '';
     

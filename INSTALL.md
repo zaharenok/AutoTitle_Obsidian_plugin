@@ -1,20 +1,20 @@
-# Инструкция по установке и тестированию AutoTitle
+# AutoTitle Installation and Testing Guide
 
-## 📦 Установка плагина в Obsidian
+## 📦 Installing the Plugin in Obsidian
 
-### Шаг 1: Подготовка файлов
-Убедитесь, что в папке проекта есть следующие файлы:
-- `main.js` (собранный файл)
+### Step 1: Prepare the Files
+Make sure you have the following files in your project folder:
+- `main.js` (compiled file)
 - `manifest.json`
 - `styles.css`
 
-### Шаг 2: Копирование в Obsidian
-1. Откройте ваше хранилище Obsidian
-2. Перейдите в папку `.obsidian/plugins/` (создайте её, если не существует)
-3. Создайте папку `autotitle`
-4. Скопируйте файлы `main.js`, `manifest.json` и `styles.css` в папку `autotitle`
+### Step 2: Copy to Obsidian
+1. Open your Obsidian vault
+2. Navigate to the `.obsidian/plugins/` folder (create it if it doesn't exist)
+3. Create a folder named `autotitle`
+4. Copy the files `main.js`, `manifest.json`, and `styles.css` into the `autotitle` folder
 
-Итоговая структура:
+Final structure should look like:
 ```
 YourVault/
 └── .obsidian/
@@ -25,95 +25,100 @@ YourVault/
             └── styles.css
 ```
 
-### Шаг 3: Активация плагина
-1. Перезапустите Obsidian
-2. Откройте Settings (Настройки)
-3. Перейдите в раздел "Community plugins"
-4. Включите плагин "AutoTitle"
+### Step 3: Activate the Plugin
+1. Restart Obsidian
+2. Open Settings
+3. Go to "Community plugins"
+4. Enable the "AutoTitle" plugin
 
-### Шаг 4: Настройка
-1. В настройках плагина введите ваш OpenAI API ключ
-2. Настройте параметры по желанию
-3. Сохраните настройки
+### Step 4: Configuration
+1. In the plugin settings, enter your OpenAI API key
+2. Adjust the parameters as desired
+3. Save the settings
 
-## 🧪 Тестирование функций
+## 🧪 Testing Features
 
-### Тест 1: Ручная генерация заголовка
-1. Создайте новую заметку
-2. Напишите несколько предложений текста
-3. Нажмите `Ctrl+Shift+H`
-4. Проверьте, появилось ли модальное окно с предлагаемым заголовком
+### Test 1: Manual Title Generation
+1. Create a new note
+2. Write a few sentences of text
+3. Press `Ctrl+Shift+H`
+4. Verify that a modal window appears with the suggested title
 
-### Тест 2: Автоматическая генерация
-1. В настройках включите "Автоматическая генерация"
-2. Создайте новую заметку
-3. Начните писать текст
-4. Остановитесь на несколько секунд
-5. Проверьте, появилось ли предложение заголовка
+### Test 2: Automatic Generation
+1. In settings, enable "Automatic generation"
+2. Create a new note
+3. Start writing text
+4. Check if the title is generated automatically
 
-### Тест 3: Генерация через ленту
-1. Создайте заметку с текстом
-2. Нажмите на иконку заголовка в левой панели
-3. Проверьте генерацию заголовка
+### Test 3: Fixing Duplicates
+1. Create several notes with identical titles
+2. In the plugin settings, click "Fix duplicates"
+3. Verify that all notes now have unique titles
 
-### Тест 4: Контекстное меню
-1. В файловом менеджере щелкните правой кнопкой по файлу `.md`
-2. Выберите "Генерировать заголовок с AI"
-3. Проверьте работу функции
+### Test 4: Context Menu
+1. In the file manager, right-click on a `.md` file
+2. Select "Generate title with AI"
+3. Verify that the function works
 
-## 🐛 Отладка
+## 🐛 Troubleshooting
 
-### Проверка консоли
-1. Откройте Developer Tools (`Ctrl+Shift+I`)
-2. Перейдите на вкладку Console
-3. Ищите сообщения от плагина (с префиксом "AutoTitle")
+### Checking the Console
+1. Open Developer Tools (`Ctrl+Shift+I`)
+2. Go to the Console tab
+3. Look for messages from the plugin (with the prefix "AutoTitle")
 
-### Проверка настроек
-1. Убедитесь, что API ключ введен правильно
-2. Проверьте, что у вас есть средства на счету OpenAI
-3. Убедитесь, что интернет-соединение работает
+### Checking Settings
+1. Make sure the API key is entered correctly
+2. Check that you have sufficient funds in your OpenAI account
+3. Ensure that your internet connection is working
 
-### Типичные проблемы
-- **Плагин не появляется в списке**: Проверьте правильность файлов и перезапустите Obsidian
-- **API ошибки**: Проверьте ключ OpenAI и лимиты аккаунта
-- **Заголовки не генерируются**: Убедитесь, что в тексте достаточно содержимого
+### Common Issues
 
-## 🔧 Разработка
+### Issue: Plugin doesn't appear in the list
+- Verify that the files are copied to the correct folder
+- Check that the folder structure matches the one shown above
+- Restart Obsidian
 
-### Режим разработки
+### Issue: Generation isn't working
+- Check your internet connection
+- Make sure the API key is entered correctly
+- Verify your API key usage quota
+
+## 🔧 Development
+
+### Development Mode
 ```bash
 npm run dev
 ```
 
-После изменений файлы будут автоматически пересобираться. Нужно только перезагрузить плагин в Obsidian (`Ctrl+R`).
+After making changes, the files will be automatically rebuilt. Just reload the plugin in Obsidian (`Ctrl+R`).
 
-### Сборка релиза
+### Building a Release
 ```bash
 npm run build
 ```
 
-Это создает оптимизированную версию для распространения.
+This creates an optimized version for distribution.
 
-## 📋 Чеклист проверки
+## 📋 Checklist
 
-- [ ] Плагин появляется в списке Community plugins
-- [ ] Настройки плагина открываются
-- [ ] API ключ сохраняется
-- [ ] Горячие клавиши работают
-- [ ] Автоматическая генерация работает
-- [ ] Кнопка в ленте работает
-- [ ] Контекстное меню работает
-- [ ] Модальное окно отображается корректно
-- [ ] Заголовки вставляются правильно
-- [ ] Файлы переименовываются (опционально)
+- [ ] Plugin appears in the Community plugins list
+- [ ] Plugin settings open
+- [ ] API key is saved
+- [ ] Hotkeys work
+- [ ] Automatic generation works
+- [ ] Button in the ribbon works
+- [ ] Context menu works
+- [ ] Modal window displays correctly
+- [ ] Titles are inserted correctly
+- [ ] Files are renamed (optional)
 
-## 💡 Советы по использованию
-
-1. **Качество генерации**: Чем больше и содержательнее текст, тем лучше заголовок
-2. **Экономия токенов**: Используйте gpt-4o-mini для обычных задач (быстрая и экономичная модель)
-3. **Языки**: Плагин автоматически определяет язык, но можно задать вручную
-4. **Тестирование**: Начните с небольших заметок для проверки работы
+## 💡 Usage Tips
+1. **Generation quality**: The more substantial and meaningful the text, the better the title
+2. **Token economy**: Use gpt-4o-mini for regular tasks (fast and cost-effective model)
+3. **Languages**: The plugin automatically detects language, but you can set it manually
+4. **Testing**: Start with small notes to verify functionality
 
 ---
 
-**Готово! Ваш плагин AutoTitle установлен и готов к использованию! 🎉**
+**Done! Your AutoTitle plugin is installed and ready to use! 🎉**
