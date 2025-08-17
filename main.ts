@@ -69,34 +69,7 @@ export default class AutoTitlePlugin extends Plugin {
       ]
     });
 
-    // Add command to fix duplicate titles
-    this.addCommand({
-      id: 'fix-duplicate-titles',
-      name: 'Fix duplicate titles in all notes',
-      callback: () => {
-        this.showMigrationConfirmationModal();
-      }
-    });
 
-    // Add command to fix current note
-    this.addCommand({
-      id: 'fix-current-note-title',
-      name: 'Fix duplicate title in current note',
-      editorCallback: (editor: Editor, view: MarkdownView) => {
-        this.fixCurrentNoteTitle(view);
-      }
-    });
-
-    // Add command to reset rejected files
-    this.addCommand({
-      id: 'reset-rejected-files',
-      name: 'Reset rejected files (allow auto-generation again)',
-      callback: () => {
-        this.rejectedFiles.clear();
-        this.temporaryRejectedFiles.clear();
-        showNotice('Rejected files list cleared. Auto-generation is now available for all notes again.');
-      }
-    });
 
     // Add settings tab
     this.addSettingTab(new AutoTitleSettingTab(this.app, this));
