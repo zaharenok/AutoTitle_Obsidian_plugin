@@ -100,8 +100,15 @@ ${cleanedContent.substring(0, 2000)}`;
       throw new Error('Failed to get title from OpenAI');
     }
     
-    // Clean up the title by removing quotes and extra characters
-    return title.replace(/^["']|["']$/g, '').trim();
+    // Clean up the title by removing quotes, extra characters, and unwanted phrases
+    let cleanedTitle = title.replace(/^["']|["']$/g, '').trim();
+    
+    // Remove specific unwanted command artifacts that might appear in AI responses
+    cleanedTitle = cleanedTitle.replace(/claude --dangerously-skip-permissions\s*/gi, '');
+    cleanedTitle = cleanedTitle.replace(/--dangerously-skip-permissions\s*/gi, '');
+    cleanedTitle = cleanedTitle.replace(/^\s*claude\s+/gi, ''); // Only remove "claude" at the beginning
+    
+    return cleanedTitle.trim();
     
   } catch (error) {
     console.error('Error generating title:', error);
