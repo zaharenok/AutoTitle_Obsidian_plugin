@@ -108,6 +108,12 @@ ${cleanedContent.substring(0, 2000)}`;
     cleanedTitle = cleanedTitle.replace(/--dangerously-skip-permissions\s*/gi, '');
     cleanedTitle = cleanedTitle.replace(/^\s*claude\s+/gi, ''); // Only remove "claude" at the beginning
     
+    // Remove processing status messages that might appear at the end
+    cleanedTitle = cleanedTitle.replace(/\s*видео обрабатывается\s*/gi, '');
+    cleanedTitle = cleanedTitle.replace(/\s*video processing\s*/gi, '');
+    cleanedTitle = cleanedTitle.replace(/\s*processing\.\.\.\s*/gi, '');
+    cleanedTitle = cleanedTitle.replace(/\s*обрабатывается\.\.\.\s*/gi, '');
+    
     return cleanedTitle.trim();
     
   } catch (error) {

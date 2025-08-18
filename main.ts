@@ -525,14 +525,29 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   private insertTitleIntoContent(content: string, title: string): string {
-    // Используем ContentProcessor для очистки дублированных заголовков
-    // Вместо добавления заголовка в содержимое, просто очищаем существующие дубликаты
-    return this.titleManager.removeDuplicateTitle(content, title);
+    // Clean duplicate titles using TitleManager
+    // Instead of adding title to content, just clean existing duplicates
+    let cleanedContent = this.titleManager.removeDuplicateTitle(content, title);
+    
+    // Remove processing status messages that might remain in content
+    cleanedContent = cleanedContent.replace(/\s*видео обрабатывается\s*/gi, '');
+    cleanedContent = cleanedContent.replace(/\s*video processing\s*/gi, '');
+    cleanedContent = cleanedContent.replace(/\s*processing\.\.\.\s*/gi, '');
+    cleanedContent = cleanedContent.replace(/\s*обрабатывается\.\.\.\s*/gi, '');
+    
+    // Add final processing tag if this appears to be a transcript/video content
+    if (cleanedContent.includes('transcript') || cleanedContent.includes('видео') || cleanedContent.includes('youtube')) {
+      if (!cleanedContent.includes('#youtube-transcribe-processor')) {
+        cleanedContent = cleanedContent.trim() + '\n\n---\n#youtube-transcribe-processor';
+      }
+    }
+    
+    return cleanedContent;
   }
 
   private async renameFile(file: TFile, newTitle: string) {
     try {
-      // Очищаем заголовок от недопустимых символов для имени файла
+      // Clean title from invalid characters for file name
       const sanitizedTitle = newTitle
         .replace(/[<>:"/\\|?*]/g, '')
         .replace(/\s+/g, ' ')
