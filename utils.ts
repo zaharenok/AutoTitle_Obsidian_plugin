@@ -113,6 +113,7 @@ ${cleanedContent.substring(0, 2000)}`;
     cleanedTitle = cleanedTitle.replace(/\s*video processing\s*/gi, '');
     cleanedTitle = cleanedTitle.replace(/\s*processing\.\.\.\s*/gi, '');
     cleanedTitle = cleanedTitle.replace(/\s*обрабатывается\.\.\.\s*/gi, '');
+    cleanedTitle = cleanedTitle.replace(/\s*⏳\s*Processing YouTube video\.\.\.\s*/gi, '');
     
     return cleanedTitle.trim();
     

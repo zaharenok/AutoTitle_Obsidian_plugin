@@ -418,16 +418,10 @@ export default class AutoTitlePlugin extends Plugin {
         this.settings.includeExistingTitle
       );
 
-      // Create modal window for confirmation
-      new TitleSuggestionModal(this.app, suggestedTitle, async (accepted: boolean, editedTitle?: string) => {
-        if (accepted) {
-          const finalTitle = editedTitle || suggestedTitle;
-          // Update file content
-          const updatedContent = this.insertTitleIntoContent(content, finalTitle);
-          await this.app.vault.modify(file, updatedContent);
-          showNotice(`Title added to file: "${finalTitle}"`);
-        }
-      }, null, null, this).open();
+      // Apply title directly without confirmation
+      const updatedContent = this.insertTitleIntoContent(content, suggestedTitle);
+      await this.app.vault.modify(file, updatedContent);
+      showNotice(`Title added to file: "${suggestedTitle}"`);
     } catch (error) {
       console.error('Title generation error:', error);
       showNotice(`Error: ${error.message}`);
@@ -534,11 +528,12 @@ export default class AutoTitlePlugin extends Plugin {
     cleanedContent = cleanedContent.replace(/\s*video processing\s*/gi, '');
     cleanedContent = cleanedContent.replace(/\s*processing\.\.\.\s*/gi, '');
     cleanedContent = cleanedContent.replace(/\s*обрабатывается\.\.\.\s*/gi, '');
+    cleanedContent = cleanedContent.replace(/\s*⏳\s*Processing YouTube video\.\.\.\s*/gi, '');
     
     // Add final processing tag if this appears to be a transcript/video content
     if (cleanedContent.includes('transcript') || cleanedContent.includes('видео') || cleanedContent.includes('youtube')) {
-      if (!cleanedContent.includes('#youtube-transcribe-processor')) {
-        cleanedContent = cleanedContent.trim() + '\n\n---\n#youtube-transcribe-processor';
+      if (!cleanedContent.includes('#youtube_transcript_processor')) {
+        cleanedContent = cleanedContent.trim() + '\n\n---\n#youtube_transcript_processor';
       }
     }
     
