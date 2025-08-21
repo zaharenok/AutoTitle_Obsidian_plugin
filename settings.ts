@@ -12,6 +12,7 @@ export interface AutoTitleSettings {
   generationCount: number;
   maxTitleLength: number;
   includeExistingTitle: boolean;
+  excludedNotes: string[];
 }
 
 export const DEFAULT_SETTINGS: AutoTitleSettings = {
@@ -27,5 +28,6 @@ export const DEFAULT_SETTINGS: AutoTitleSettings = {
   showIndicator: true,
   generationCount: 1,
   maxTitleLength: 100,
-  includeExistingTitle: false
+  includeExistingTitle: false,
+  excludedNotes: []
 };

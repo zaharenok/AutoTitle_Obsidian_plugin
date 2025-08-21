@@ -350,6 +350,16 @@ export default class AutoTitlePlugin extends Plugin {
       return;
     }
 
+    // Check if note is in excluded list
+    const file = activeView.file;
+    if (file) {
+      const fileName = file.basename;
+      if (this.settings.excludedNotes.includes(fileName)) {
+        showNotice(`Note "${fileName}" is in the excluded list and cannot generate titles`);
+        return;
+      }
+    }
+
     const editor = activeView.editor;
     await this.generateTitleForEditor(editor, activeView);
   }
@@ -394,6 +404,13 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   private async generateTitleForFile(file: TFile) {
+    // Check if note is in excluded list
+    const fileName = file.basename;
+    if (this.settings.excludedNotes.includes(fileName)) {
+      showNotice(`Note "${fileName}" is in the excluded list and cannot generate titles`);
+      return;
+    }
+
     const content = await this.app.vault.read(file);
     if (!content || content.trim().length < 10) {
       showNotice('Insufficient content for title generation');
@@ -571,6 +588,16 @@ export default class AutoTitlePlugin extends Plugin {
       return;
     }
 
+    // Check if note is in excluded list
+    const file = view?.file;
+    if (file) {
+      const fileName = file.basename;
+      if (this.settings.excludedNotes.includes(fileName)) {
+        showNotice(`Note "${fileName}" is in the excluded list and cannot generate titles`);
+        return;
+      }
+    }
+
     const content = editor.getValue();
     if (!content || content.trim().length < 10) {
       showNotice('Insufficient content for title generation');
@@ -728,6 +755,14 @@ export default class AutoTitlePlugin extends Plugin {
    * Проверяет, можно ли показать предложение для файла
    */
   private canShowSuggestionForFile(filePath: string): boolean {
+    // Получаем имя файла без расширения
+    const fileName = filePath.split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Проверяем исключенные заметки
+    if (this.settings.excludedNotes.includes(fileName)) {
+      return false;
+    }
+    
     // Проверяем постоянные отказы
     if (this.rejectedFiles.has(filePath)) {
       return false;

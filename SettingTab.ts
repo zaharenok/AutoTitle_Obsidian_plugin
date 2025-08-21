@@ -204,6 +204,33 @@ export class AutoTitleSettingTab extends PluginSettingTab {
       await this.plugin.fixCurrentNoteTitleFromSettings();
     };
 
+    // Excluded Notes section
+    containerEl.createEl('h3', { text: 'Excluded Notes' });
+    const excludedInfo = containerEl.createDiv();
+    excludedInfo.innerHTML = `
+      <p>Add note names (without extension) that should never trigger auto-generation. 
+      For example: "HOME", "Daily Notes", "Template"</p>
+    `;
+    
+    new Setting(containerEl)
+      .setName('Excluded Notes')
+      .setDesc('Note names that will never trigger title generation (one per line)')
+      .addTextArea(text => {
+        const textArea = text
+          .setPlaceholder('HOME\nDaily Notes\nTemplate')
+          .setValue(this.plugin.settings.excludedNotes.join('\n'))
+          .onChange(async (value) => {
+            this.plugin.settings.excludedNotes = value.split('\n')
+              .map(line => line.trim())
+              .filter(line => line.length > 0);
+            await this.plugin.saveSettings();
+          });
+        textArea.inputEl.rows = 4;
+        textArea.inputEl.style.width = '100%';
+        textArea.inputEl.style.minHeight = '80px';
+        return textArea;
+      });
+
     // Reset rejected files section
     containerEl.createEl('h3', { text: 'Auto-generation Control' });
     const rejectedInfo = containerEl.createDiv();
