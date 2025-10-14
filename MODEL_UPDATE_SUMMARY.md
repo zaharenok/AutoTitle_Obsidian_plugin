@@ -3,7 +3,7 @@
 ## What's Changed
 
 ### Updated Models
-- **Default**: `gpt-3.5-turbo` → `gpt-4o-mini`
+- **Default**: `gpt-5-mini` → `gpt-4o-mini`
 - **Recommended**: `gpt-4o` (best quality)
 - **Cost-effective**: `gpt-4o-mini` (fast and affordable)
 - **Powerful**: `gpt-4-turbo` (for complex tasks)
