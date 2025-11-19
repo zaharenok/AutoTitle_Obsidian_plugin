@@ -54,7 +54,7 @@ export class TitleManager {
   async setNoteTitle(file: TFile, title: string): Promise<void> {
     try {
       // Validate and truncate the title
-      const maxLength = this.settings?.maxTitleLength || 100;
+      const maxLength = this.settings?.maxTitleLength ?? 100;
       const validatedTitle = this.contentProcessor.validateAndTruncateTitle(title, maxLength);
       
       // Используем fileManager для переименования файла, что автоматически обновит заголовок
@@ -107,7 +107,7 @@ export class TitleManager {
     
     try {
       // Валидируем и обрезаем заголовок
-      const maxLength = this.settings?.maxTitleLength || 100;
+      const maxLength = this.settings?.maxTitleLength ?? 100;
       const validatedTitle = this.contentProcessor.validateAndTruncateTitle(title, maxLength);
       
       // Устанавливаем заголовок файла

@@ -110,8 +110,8 @@ export class SupportSection {
     Object.assign(linkEl.style, {
       textDecoration: 'none',
       padding: '10px 16px',
-      backgroundColor: link.bgColor || 'var(--interactive-accent)',
-      color: link.textColor || 'var(--text-on-accent)',
+      backgroundColor: link.bgColor ?? 'var(--interactive-accent)',
+      color: link.textColor ?? 'var(--text-on-accent)',
       borderRadius: '4px',
       fontWeight: 'bold',
       whiteSpace: 'nowrap',

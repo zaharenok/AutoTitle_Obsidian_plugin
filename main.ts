@@ -172,7 +172,7 @@ export default class AutoTitlePlugin extends Plugin {
         return;
       }
       
-      const currentCount = this.generatedCountForFile.get(file.path) || 0;
+      const currentCount = this.generatedCountForFile.get(file.path) ?? 0;
       if (currentCount >= this.settings.generationCount) {
         return;
       }
@@ -194,7 +194,7 @@ export default class AutoTitlePlugin extends Plugin {
     // Check if there's already a title
     const lines = content.split('\n');
     const firstLine = lines[0]?.trim();
-    if (firstLine && firstLine.startsWith('#') && !this.settings.replaceMode) {
+    if (firstLine?.startsWith('#') && !this.settings.replaceMode) {
       return;
     }
 
@@ -233,7 +233,7 @@ export default class AutoTitlePlugin extends Plugin {
     const firstLine = lines[0]?.trim();
     
     // If first line is already a title and replace mode is off, don't generate
-    if (firstLine && firstLine.startsWith('#') && !this.settings.replaceMode) {
+    if (firstLine?.startsWith('#') && !this.settings.replaceMode) {
       return;
     }
     
@@ -245,7 +245,7 @@ export default class AutoTitlePlugin extends Plugin {
         return;
       }
       
-      const currentCount = this.generatedCountForFile.get(file.path) || 0;
+      const currentCount = this.generatedCountForFile.get(file.path) ?? 0;
       if (currentCount >= this.settings.generationCount) {
         return;
       }
@@ -269,7 +269,7 @@ export default class AutoTitlePlugin extends Plugin {
         showNotice(`Title updated: "${suggestedTitle}"`);
         // Increment generation counter for this note
         if (file) {
-          const currentCount = this.generatedCountForFile.get(file.path) || 0;
+          const currentCount = this.generatedCountForFile.get(file.path) ?? 0;
           this.generatedCountForFile.set(file.path, currentCount + 1);
         }
       } else {
@@ -451,12 +451,12 @@ export default class AutoTitlePlugin extends Plugin {
     new TitleSuggestionModal(this.app, suggestedTitle, (accepted: boolean, editedTitle?: string, rejectType?: 'temporary' | 'permanent') => {
       const file = view?.file;
       if (accepted) {
-        const finalTitle = editedTitle || suggestedTitle;
+        const finalTitle = editedTitle ?? suggestedTitle;
         void this.replaceTitle(editor, finalTitle, view).then(() => {
           showNotice(`Title updated: "${finalTitle}"`);
           // Increment generation counter for this note
           if (file) {
-            const currentCount = this.generatedCountForFile.get(file.path) || 0;
+            const currentCount = this.generatedCountForFile.get(file.path) ?? 0;
             this.generatedCountForFile.set(file.path, currentCount + 1);
           }
           // Rename file if possible
@@ -498,7 +498,7 @@ export default class AutoTitlePlugin extends Plugin {
         this.replaceTitleFallback(editor, newTitle);
         
         // Show warning to user only in case of critical error
-        if (result.error && result.error.includes('critical')) {
+        if (result.error?.includes('critical')) {
           showNotice(`Warning: ${result.error}`);
         }
       }
@@ -525,7 +525,7 @@ export default class AutoTitlePlugin extends Plugin {
     const lines = content.split('\n');
     
     // Проверяем, есть ли уже заголовок в первой строке
-    if (lines[0] && lines[0].trim().startsWith('#')) {
+    if (lines[0]?.trim().startsWith('#')) {
       // Заменяем существующий заголовок
       lines[0] = `# ${newTitle}`;
     } else {
@@ -630,7 +630,7 @@ export default class AutoTitlePlugin extends Plugin {
       // Увеличиваем счетчик генераций для этой заметки
       const file = view?.file;
       if (file) {
-        const currentCount = this.generatedCountForFile.get(file.path) || 0;
+        const currentCount = this.generatedCountForFile.get(file.path) ?? 0;
         this.generatedCountForFile.set(file.path, currentCount + 1);
       }
       
@@ -757,7 +757,7 @@ export default class AutoTitlePlugin extends Plugin {
    */
   private canShowSuggestionForFile(filePath: string): boolean {
     // Получаем имя файла без расширения
-    const fileName = filePath.split('/').pop()?.replace(/\.md$/, '') || '';
+    const fileName = filePath.split('/').pop()?.replace(/\.md$/, '') ?? '';
     
     // Проверяем исключенные заметки
     if (this.settings.excludedNotes.includes(fileName)) {
