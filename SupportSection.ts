@@ -1,4 +1,4 @@
-import { App, PluginSettingTab } from 'obsidian';
+// No imports needed - this file only contains interfaces and utility functions
 
 export interface SupportLink {
   text: string;

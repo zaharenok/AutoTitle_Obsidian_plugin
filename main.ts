@@ -7,13 +7,13 @@ import { MigrationService } from './MigrationService';
 
 export default class AutoTitlePlugin extends Plugin {
   settings: AutoTitleSettings;
-  private typingTimer: NodeJS.Timeout | null = null;
+  private typingTimer: number | null = null;
   private isGenerating = false;
   private generatedCountForFile: Map<string, number> = new Map();
   private rejectedFiles: Set<string> = new Set();
   private temporaryRejectedFiles: Map<string, number> = new Map(); // filepath -> timestamp
   private statusBarItem: HTMLElement | null = null;
-  private indicatorTimer: NodeJS.Timeout | null = null;
+  private indicatorTimer: number | null = null;
   private titleManager: TitleManager;
   private migrationService: MigrationService;
 
@@ -34,16 +34,16 @@ export default class AutoTitlePlugin extends Plugin {
     this.migrationService = new MigrationService(this.app, this.titleManager);
 
     // Add ribbon button
-    this.addRibbonIcon('heading', 'Generate Title', async () => {
-      await this.generateTitleForActiveNote();
+    this.addRibbonIcon('heading', 'Generate Title', () => {
+      void this.generateTitleForActiveNote();
     });
 
     // Add command
     this.addCommand({
       id: 'generate-title',
       name: 'Generate title (with confirmation)',
-      callback: async () => {
-        await this.generateTitleForActiveNote();
+      callback: () => {
+        void this.generateTitleForActiveNote();
       },
       hotkeys: [
         {
@@ -58,8 +58,8 @@ export default class AutoTitlePlugin extends Plugin {
     this.addCommand({
       id: 'generate-title-direct',
       name: 'Generate title (direct, no confirmation)',
-      editorCallback: (editor: Editor, view: MarkdownView) => {
-        this.generateTitleDirect(editor, view);
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        await this.generateTitleDirect(editor, view);
       },
       hotkeys: [
         {
@@ -72,7 +72,7 @@ export default class AutoTitlePlugin extends Plugin {
 
 
     // Add settings tab
-    await this.addSettingTab(new AutoTitleSettingTab(this.app, this));
+    this.addSettingTab(new AutoTitleSettingTab(this.app, this));
 
     // Add status bar item
     this.statusBarItem = this.addStatusBarItem();
@@ -90,7 +90,7 @@ export default class AutoTitlePlugin extends Plugin {
               .setTitle('Generate Title with AI')
               .setIcon('heading')
               .onClick(() => {
-                this.generateTitleForFile(file);
+                void this.generateTitleForFile(file);
               });
           });
         }
@@ -200,21 +200,21 @@ export default class AutoTitlePlugin extends Plugin {
 
     if (this.settings.triggerMode === 'auto') {
       // Automatic mode - start generation after pause
-      this.typingTimer = setTimeout(() => {
-        this.autoGenerateTitle(editor, view);
-      }, this.settings.timeout);
+      this.typingTimer = window.setTimeout(() => {
+        void this.autoGenerateTitle(editor, view);
+      }, this.settings.timeout) as unknown as number;
       
       // Show indicator if enabled
       if (this.settings.showIndicator) {
-        this.indicatorTimer = setTimeout(() => {
+        this.indicatorTimer = window.setTimeout(() => {
           this.showGenerationIndicator();
-        }, this.settings.timeout - 1000);
+        }, this.settings.timeout - 1000) as unknown as number;
       }
     } else if (this.settings.triggerMode === 'semi-auto') {
       // Semi-automatic mode - show indicator and manual trigger button
-      this.typingTimer = setTimeout(() => {
+      this.typingTimer = window.setTimeout(() => {
         this.showManualTriggerButton(editor, view);
-      }, this.settings.timeout);
+      }, this.settings.timeout) as unknown as number;
     }
   }
 
@@ -314,7 +314,7 @@ export default class AutoTitlePlugin extends Plugin {
     
     const texts = this.getLocalizedTexts();
     
-    const text = noticeEl.createEl('span', { text: texts.readyToGenerate });
+    noticeEl.createEl('span', { text: texts.readyToGenerate });
     const generateButton = noticeEl.createEl('button', { text: texts.generate });
     generateButton.style.marginLeft = '10px';
     generateButton.style.backgroundColor = 'var(--interactive-accent)';
@@ -327,7 +327,7 @@ export default class AutoTitlePlugin extends Plugin {
     
     generateButton.onclick = () => {
       notice.hide();
-      this.autoGenerateTitle(editor, view);
+      void this.autoGenerateTitle(editor, view);
     };
     
     const cancelButton = noticeEl.createEl('button', { text: texts.cancel });
@@ -448,21 +448,22 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   private showTitleSuggestionModal(editor: Editor, view: MarkdownView, suggestedTitle: string) {
-    new TitleSuggestionModal(this.app, suggestedTitle, async (accepted: boolean, editedTitle?: string, rejectType?: 'temporary' | 'permanent') => {
+    new TitleSuggestionModal(this.app, suggestedTitle, (accepted: boolean, editedTitle?: string, rejectType?: 'temporary' | 'permanent') => {
       const file = view?.file;
       if (accepted) {
         const finalTitle = editedTitle || suggestedTitle;
-        await this.replaceTitle(editor, finalTitle, view);
-        showNotice(`Title updated: "${finalTitle}"`);
-        // Increment generation counter for this note
-        if (file) {
-          const currentCount = this.generatedCountForFile.get(file.path) || 0;
-          this.generatedCountForFile.set(file.path, currentCount + 1);
-        }
-        // Rename file if possible
-        if (view.file) {
-          this.renameFile(view.file, finalTitle);
-        }
+        void this.replaceTitle(editor, finalTitle, view).then(() => {
+          showNotice(`Title updated: "${finalTitle}"`);
+          // Increment generation counter for this note
+          if (file) {
+            const currentCount = this.generatedCountForFile.get(file.path) || 0;
+            this.generatedCountForFile.set(file.path, currentCount + 1);
+          }
+          // Rename file if possible
+          if (view.file) {
+            void this.renameFile(view.file, finalTitle);
+          }
+        });
       } else {
         // User rejected suggestion
         if (file) {
@@ -635,7 +636,7 @@ export default class AutoTitlePlugin extends Plugin {
       
       // Переименовываем файл, если это возможно
       if (view.file) {
-        this.renameFile(view.file, suggestedTitle);
+        void this.renameFile(view.file, suggestedTitle);
       }
     } catch (error) {
       console.error('Title generation error:', error);
@@ -660,9 +661,9 @@ export default class AutoTitlePlugin extends Plugin {
       new MigrationConfirmationModal(
         this.app,
         stats,
-        async (confirmed: boolean) => {
+        (confirmed: boolean) => {
           if (confirmed) {
-            await this.runMigration();
+            void this.runMigration();
           }
         }
       ).open();
@@ -796,9 +797,11 @@ export default class AutoTitlePlugin extends Plugin {
    * Получает локализованные тексты для интерфейса
    */
   getLocalizedTexts() {
-    const isRussian = this.settings.language === 'ru' || 
-                     (this.settings.language === 'auto' && 
-                      (navigator.language.startsWith('ru') || 
+    // Use document language as fallback since navigator is not allowed
+    const locale = document.documentElement.lang || 'en-US';
+    const isRussian = this.settings.language === 'ru' ||
+                     (this.settings.language === 'auto' &&
+                      (locale.startsWith('ru') ||
                        document.documentElement.lang?.startsWith('ru')));
 
     if (isRussian) {
@@ -882,7 +885,7 @@ class TitleSuggestionModal extends Modal {
 
     const regenerateButton = buttonsDiv.createEl('button', { text: texts.regenerate });
     regenerateButton.onclick = () => {
-      this.regenerateTitle();
+      void this.regenerateTitle();
     };
 
     const acceptButton = buttonsDiv.createEl('button', { text: texts.accept });
