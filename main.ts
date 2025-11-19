@@ -22,7 +22,7 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   async onload() {
-    console.log('Loading AutoTitle plugin');
+    console.debug('Loading AutoTitle plugin');
 
     await this.loadSettings();
     
@@ -34,16 +34,16 @@ export default class AutoTitlePlugin extends Plugin {
     this.migrationService = new MigrationService(this.app, this.titleManager);
 
     // Add ribbon button
-    this.addRibbonIcon('heading', 'Generate Title', (evt: MouseEvent) => {
-      this.generateTitleForActiveNote();
+    this.addRibbonIcon('heading', 'Generate Title', async () => {
+      await this.generateTitleForActiveNote();
     });
 
     // Add command
     this.addCommand({
       id: 'generate-title',
       name: 'Generate title (with confirmation)',
-      callback: () => {
-        this.generateTitleForActiveNote();
+      callback: async () => {
+        await this.generateTitleForActiveNote();
       },
       hotkeys: [
         {
@@ -72,7 +72,7 @@ export default class AutoTitlePlugin extends Plugin {
 
 
     // Add settings tab
-    this.addSettingTab(new AutoTitleSettingTab(this.app, this));
+    await this.addSettingTab(new AutoTitleSettingTab(this.app, this));
 
     // Add status bar item
     this.statusBarItem = this.addStatusBarItem();
@@ -99,7 +99,7 @@ export default class AutoTitlePlugin extends Plugin {
   }
 
   onunload() {
-    console.log('Unloading AutoTitle plugin');
+    console.debug('Unloading AutoTitle plugin');
     if (this.typingTimer) {
       clearTimeout(this.typingTimer);
     }
