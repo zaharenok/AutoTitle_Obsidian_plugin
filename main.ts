@@ -159,6 +159,17 @@ export default class AutoTitlePlugin extends Plugin {
     }
   }
 
+  /**
+   * Handles editor change events for auto-generation mode.
+   *
+   * This method is called automatically as the user types in semi-auto and auto modes.
+   * It implements several safeguards to prevent annoying the user:
+   * - Debounces input using typingTimer (configurable delay)
+   * - Limits generations per file (generationCount setting)
+   * - Respects temporary and permanent user rejections
+   * - Only triggers when content meets minimum length requirement
+   * - Skips if title already exists (unless replaceMode is enabled)
+   */
   private handleEditorChange(editor: Editor, view: MarkdownView) {
     if (this.isGenerating) {
       return;
